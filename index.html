@@ -143,57 +143,68 @@
       actualizarContadorCarrito();
     }
 
+    // Event listener para cerrar sesión
+    document.getElementById("logoutBtn").addEventListener('click', () => {
+      usuario = null;
+      carrito = [];
+      historial = [];
+      loginScreen.style.display = 'flex';
+      mainApp.style.display = 'none';
+      loginForm.reset();
+      registerForm.reset();
+      
+      // Volver a la pestaña de Iniciar Sesión por defecto
+      loginTab.click(); 
+    });
+
     // ========= FUNCIONES PRINCIPALES =========
     function mostrarProductos() {
       productosGrid.innerHTML = "";
       productos.forEach(p => {
         const card = document.createElement("div");
         card.className = "product-card";
-        
-        let botones = '';
-        if (usuario.esAdmin) {
-          botones = `
-            <button class="btn-edit" onclick="editar(${p.id})">Editar</button>
-            <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>
-          `;
-        } else {
-          botones = `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`;
-        }
-        
         card.innerHTML = `
           <div class="product-image">🛍</div>
           <div class="product-info">
             <div class="product-name">${p.nombre}</div>
             <div class="product-category">${p.categoria}</div>
             <div class="product-price">$${p.precio}</div>
-            <div>${botones}</div>
+            <div>
+              ${usuario.esAdmin
+                ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
+                   <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
+                : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`
+              }
+            </div>
           </div>
         `;
         productosGrid.appendChild(card);
       });
+      // Asegurarse de que el área de contenido muestre la cuadrícula de productos
+      contentArea.innerHTML = '';
+      contentArea.appendChild(productosGrid);
+      pageTitle.textContent = "Catálogo de Productos";
     }
 
     function agregarAlCarrito(id) {
       const p = productos.find(x => x.id === id);
-      if (p) {
-        carrito.push(p);
-        actualizarContadorCarrito();
-        alert(p.nombre + ' agregado al carrito');
-      }
+      // Agregar un clon del producto al carrito para evitar referencias directas si se modificara.
+      // Aquí se simplifica asumiendo que solo se guarda la referencia por simplicidad
+      carrito.push({...p});
+      actualizarContadorCarrito();
+      alert(`${p.nombre} agregado al carrito`);
     }
 
     function editar(id) {
       const p = productos.find(x => x.id === id);
-      if (p) {
-        editandoProducto = true;
-        formTitle.textContent = "Editar Producto";
-        productId.value = p.id;
-        productName.value = p.nombre;
-        productCategory.value = p.categoria;
-        productPrice.value = p.precio;
-        productImage.value = p.imagen || "";
-        overlay.style.display = "flex";
-      }
+      editandoProducto = true;
+      formTitle.textContent = "Editar Producto";
+      productId.value = p.id;
+      productName.value = p.nombre;
+      productCategory.value = p.categoria;
+      productPrice.value = p.precio;
+      productImage.value = p.imagen || "";
+      overlay.style.display = "flex";
     }
 
     function borrar(id) {
@@ -303,7 +314,7 @@
       html += `
           <div class="cart-total">
             <span>Total:</span>
-            <span>$${total}</span>
+            <span>$${total.toFixed(2)}</span>
           </div>
           <button class="btn-checkout" onclick="mostrarFormularioPago()">Proceder al Pago</button>
         </div>
@@ -317,130 +328,8 @@
       actualizarContadorCarrito();
       mostrarCarrito();
     }
-
-    // ========= FORMULARIO DE PAGO =========
-    function mostrarFormularioPago() {
-      // Configurar métodos de pago
-      document.querySelectorAll('.payment-method').forEach(method => {
-        method.addEventListener('click', function() {
-          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-          this.classList.add('selected');
-        });
-      });
-      
-      // Establecer el primer método como seleccionado por defecto
-      document.querySelector('.payment-method').classList.add('selected');
-      
-      // Actualizar resumen de compra
-      let summaryHtml = '';
-      let total = 0;
-      
-      carrito.forEach(item => {
-        summaryHtml += `
-          <div class="payment-summary-item">
-            <span>${item.nombre}</span>
-            <span>$${item.precio}</span>
-          </div>
-        `;
-        total += item.precio;
-      });
-      
-      paymentSummaryItems.innerHTML = summaryHtml;
-      paymentTotal.textContent = '$' + total;
-      
-      // Mostrar overlay de pago
-      paymentOverlay.style.display = "flex";
-    }
-
-    btnConfirmPayment.addEventListener('click', () => {
-      // Validar formulario
-      const shippingName = document.getElementById('shippingName').value;
-      const shippingPhone = document.getElementById('shippingPhone').value;
-      const shippingAddress = document.getElementById('shippingAddress').value;
-      const shippingCity = document.getElementById('shippingCity').value;
-      const shippingZip = document.getElementById('shippingZip').value;
-      
-      if (!shippingName || !shippingPhone || !shippingAddress || !shippingCity || !shippingZip) {
-        alert('Por favor, completa todos los campos de envío');
-        return;
-      }
-      
-      // En una aplicación real, aquí procesaríamos el pago
-      alert('¡Pago procesado exitosamente! Gracias por tu compra.');
-      
-      // Agregar al historial
-      const compra = {
-        fecha: new Date().toLocaleDateString(),
-        productos: [...carrito],
-        total: carrito.reduce((sum, item) => sum + item.precio, 0)
-      };
-      historial.push(compra);
-      
-      // Limpiar carrito
-      carrito = [];
-      actualizarContadorCarrito();
-      
-      // Cerrar formulario y volver al catálogo
-      paymentOverlay.style.display = "none";
-      mostrarProductos();
-      pageTitle.textContent = "Catálogo de Productos";
-    });
-
-    btnCancelPayment.addEventListener('click', () => {
-      paymentOverlay.style.display = "none";
-    });
-
-    // ========= NAVEGACIÓN =========
-    document.getElementById("menuCarrito").addEventListener('click', () => {
-      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.getElementById("menuCarrito").classList.add('active');
-      mostrarCarrito();
-    });
-
-    document.getElementById("menuHistorial").addEventListener('click', () => {
-      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.getElementById("menuHistorial").classList.add('active');
-      mostrarHistorial();
-    });
-
-    document.getElementById("menuCatalogo").addEventListener('click', () => {
-      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
-        item.classList.remove('active');
-      });
-      document.getElementById("menuCatalogo").classList.add('active');
-      mostrarProductos();
-      pageTitle.textContent = "Catálogo de Productos";
-    });
-
-    // ======= CERRAR SESIÓN =======
-    document.getElementById("logoutBtn").addEventListener('click', () => {
-      if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-        usuario = null;
-        carrito = [];
-        mainApp.style.display = 'none';
-        loginScreen.style.display = 'flex';
-        
-        // Limpiar formularios
-        document.getElementById('email').value = '';
-        document.getElementById('password').value = '';
-        document.getElementById('regName').value = '';
-        document.getElementById('regEmail').value = '';
-        document.getElementById('regPassword').value = '';
-        document.getElementById('regConfirmPassword').value = '';
-        
-        // Volver a pestaña de login
-        loginTab.classList.add('active');
-        registerTab.classList.remove('active');
-        loginForm.style.display = 'block';
-        registerForm.style.display = 'none';
-      }
-    });
-
-    // ======= MOSTRAR HISTORIAL =======
+    
+    // ========= HISTORIAL DE COMPRAS (COMPLETADO) =========
     function mostrarHistorial() {
       pageTitle.textContent = "Historial de Compras";
       
@@ -448,8 +337,8 @@
         contentArea.innerHTML = `
           <div class="cart-container">
             <div class="empty-cart">
-              <h3>No hay compras realizadas</h3>
-              <p>Tu historial de compras aparecerá aquí</p>
+              <h3>No tienes compras en tu historial</h3>
+              <p>Realiza tu primera compra en el catálogo</p>
             </div>
           </div>
         `;
@@ -461,30 +350,30 @@
           <h2 style="color:#002147; margin-bottom:20px;">Tus Compras Anteriores</h2>
       `;
       
-      historial.forEach((compra, index) => {
+      // Mostrar el historial de la más reciente a la más antigua
+      const historialInvertido = [...historial].reverse(); 
+
+      historialInvertido.forEach((compra, index) => {
         html += `
-          <div style="border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-              <strong>Compra #${index + 1}</strong>
-              <span>Fecha: ${compra.fecha}</span>
-            </div>
-            <div style="margin-bottom: 10px;">
+          <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
+            <h4 style="color: #0047ab; margin-bottom: 10px;">Compra #${historial.length - index} (${compra.fecha})</h4>
+            <ul style="list-style: none; padding-left: 0; margin-bottom: 10px;">
         `;
         
-        compra.productos.forEach(p => {
+        compra.productos.forEach(item => {
           html += `
-            <div style="display: flex; justify-content: space-between; padding: 5px 0;">
-              <span>${p.nombre}</span>
-              <span>$${p.precio}</span>
-            </div>
+            <li style="display: flex; justify-content: space-between; font-size: 14px; padding: 5px 0; border-bottom: 1px dotted #eee;">
+              <span>${item.nombre}</span>
+              <span>$${item.precio.toFixed(2)}</span>
+            </li>
           `;
         });
         
         html += `
-            </div>
-            <div style="border-top: 1px solid #002147; padding-top: 10px; font-weight: bold; display: flex; justify-content: space-between;">
-              <span>Total:</span>
-              <span>$${compra.total}</span>
+            </ul>
+            <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc;">
+              <span>Total de Compra:</span>
+              <span style="color: #28a745;">$${compra.total.toFixed(2)}</span>
             </div>
           </div>
         `;
@@ -493,4 +382,142 @@
       html += `</div>`;
       contentArea.innerHTML = html;
     }
+
+
+    // ========= FORMULARIO DE PAGO =========
+    function mostrarFormularioPago() {
+      // Configurar métodos de pago
+      document.querySelectorAll('.payment-method').forEach(method => {
+        method.onclick = function() { // Reemplaza addEventListener para simplificar
+          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+          this.classList.add('selected');
+        };
+      });
+      
+      // Establecer el primer método como seleccionado por defecto (asegurarse de que exista)
+      const firstPaymentMethod = document.querySelector('.payment-method');
+      if (firstPaymentMethod) {
+          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+          firstPaymentMethod.classList.add('selected');
+      }
+      
+      // Actualizar resumen de compra
+      let summaryHtml = '';
+      let total = 0;
+      
+      carrito.forEach(item => {
+        summaryHtml += `
+          <div class="payment-summary-item">
+            <span>${item.nombre}</span>
+            <span>$${item.precio.toFixed(2)}</span>
+          </div>
+        `;
+        total += item.precio;
+      });
+      
+      paymentSummaryItems.innerHTML = summaryHtml;
+      paymentTotal.textContent = `$${total.toFixed(2)}`;
+      
+      // Mostrar overlay de pago
+      paymentOverlay.style.display = "flex";
+    }
+
+    btnConfirmPayment.addEventListener('click', () => {
+      // Validar formulario de envío
+      const shippingName = document.getElementById('shippingName').value;
+      const shippingPhone = document.getElementById('shippingPhone').value;
+      const shippingAddress = document.getElementById('shippingAddress').value;
+      const shippingCity = document.getElementById('shippingCity').value;
+      const shippingZip = document.getElementById('shippingZip').value;
+      
+      if (!shippingName || !shippingPhone || !shippingAddress || !shippingCity || !shippingZip) {
+        alert('Por favor, completa todos los campos de envío');
+        return;
+      }
+      
+      // Validar método de pago
+      const selectedMethod = document.querySelector('.payment-method.selected');
+      if (!selectedMethod) {
+        alert('Por favor, selecciona un método de pago');
+        return;
+      }
+
+      // Validar datos de tarjeta si se selecciona (simplificado)
+      if (selectedMethod.dataset.method === 'credit' || selectedMethod.dataset.method === 'debit') {
+        const cardName = document.getElementById('cardName').value;
+        const cardNumber = document.getElementById('cardNumber').value;
+        const cardExpiry = document.getElementById('cardExpiry').value;
+        const cardCVC = document.getElementById('cardCVC').value;
+        if (!cardName || !cardNumber || !cardExpiry || !cardCVC) {
+            alert('Por favor, completa todos los datos de la tarjeta');
+            return;
+        }
+      }
+      
+      // En una aplicación real, aquí procesaríamos el pago
+      alert('¡Pago procesado exitosamente! Gracias por tu compra.');
+      
+      // Agregar al historial
+      const compra = {
+        fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        productos: [...carrito], // Copia profunda
+        total: carrito.reduce((sum, item) => sum + item.precio, 0)
+      };
+      historial.push(compra);
+      
+      // Limpiar carrito
+      carrito = [];
+      actualizarContadorCarrito();
+      
+      // Limpiar campos del formulario de pago (opcional, pero buena práctica)
+      document.getElementById('shippingName').value = '';
+      document.getElementById('shippingPhone').value = '';
+      document.getElementById('shippingAddress').value = '';
+      document.getElementById('shippingCity').value = '';
+      document.getElementById('shippingZip').value = '';
+      document.getElementById('cardName').value = '';
+      document.getElementById('cardNumber').value = '';
+      document.getElementById('cardExpiry').value = '';
+      document.getElementById('cardCVC').value = '';
+      document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected')); // Desseleccionar método
+      
+      // Cerrar formulario y volver al catálogo
+      paymentOverlay.style.display = "none";
+      
+      // Navegar automáticamente a Historial para ver la compra recién hecha
+      document.getElementById("menuHistorial").click(); 
+    });
+
+    btnCancelPayment.addEventListener('click', () => {
+      paymentOverlay.style.display = "none";
+    });
+
+    // ========= NAVEGACIÓN =========
+    document.getElementById("menuCarrito").addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCarrito").classList.add('active');
+      mostrarCarrito();
+    });
+
+    document.getElementById("menuHistorial").addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuHistorial").classList.add('active');
+      mostrarHistorial();
+    });
+
+    document.getElementById("menuCatalogo").addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCatalogo").classList.add('active');
+      mostrarProductos();
+      pageTitle.textContent = "Catálogo de Productos";
+    });
 </script>
