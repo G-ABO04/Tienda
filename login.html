@@ -22,12 +22,7 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.3);
       text-align: center;
     }
-    .store-name {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #002147;
-      margin-bottom: 10px;
-    }
+    .store-name { font-size: 1.8rem; font-weight: bold; color: #002147; margin-bottom: 10px; }
     h2 { color: #004080; margin-bottom: 20px; }
     input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
     .actions { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
@@ -82,6 +77,12 @@
     const regEmailInput = document.getElementById('reg-email');
     const regRoleSelect = document.getElementById('regRole');
 
+    // Si ya hay usuario guardado, redirige al index directamente
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      window.location.href = 'index.html';
+    }
+
     // Cambiar entre login y registro
     showRegisterBtn.addEventListener('click', () => {
       loginForm.classList.add('hidden');
@@ -127,9 +128,15 @@
     // Login
     loginForm.addEventListener('submit', e => {
       e.preventDefault();
-      // Aquí podrías validar usuario/clave, pero por ahora simulamos
+      const formData = new FormData(loginForm);
+      const usuario = formData.get('usuario');
+      const tipo = formData.get('tipo');
+
+      // Guardar usuario en localStorage
+      localStorage.setItem('currentUser', JSON.stringify({ usuario, tipo }));
+
       alert('Inicio de sesión exitoso');
-      window.location.href = 'index.html'; // redirige al index
+      window.location.href = 'index.html';
     });
   </script>
 </body>
