@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login y Registro - MisSup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #004080, #002147);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 380px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    .store-name {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #002147;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      color: #004080;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    input[type="submit"],
+    button.toggle {
+      background: #004080;
+      color: #fff;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button.toggle {
+      background: #002147;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #444;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="store-name">MisSup</div>
+    <h2 id="form-title">Iniciar sesión</h2>
+
+    <form id="login-form" action="#" method="post">
+      <input id="loginUsuario" name="usuario" type="text" placeholder="Usuario" required>
+      <input id="loginClave" name="clave" type="password" placeholder="Contraseña" required>
+      <div class="actions">
+        <input type="submit" value="Entrar">
+        <button type="button" class="toggle" id="show-register">Registro</button>
+      </div>
+    </form>
+
+    <form id="register-form" class="hidden" action="#" method="post">
+      <input id="regNombre" name="nombre" type="text" placeholder="Nombre completo" required>
+      <input id="regEmail" name="email" type="email" placeholder="Correo electrónico" required>
+      <input id="regUsuario" name="usuario_reg" type="text" placeholder="Usuario" required>
+      <input id="regClave" name="clave_reg" type="password" placeholder="Contraseña" required>
+      <select id="regRole" name="role" required>
+        <option value="user">Usuario normal</option>
+        <option value="admin">Administrador</option>
+      </select>
+
+      <div class="actions">
+        <input type="submit" value="Registrar">
+        <button type="button" class="toggle" id="show-login">Volver</button>
+      </div>
+      <div class="note">Registro local de demostración. No es seguro para producción.</div>
+    </form>
+  </div>
+
+  <script>
+    // Elementos
+    const showRegisterBtn = document.getElementById('show-register');
+    const showLoginBtn = document.getElementById('show-login');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const title = document.getElementById('form-title');
+
+    // Inputs login
+    const loginUsuario = document.getElementById('loginUsuario');
+    const loginClave = document.getElementById('loginClave');
+
+    // Inputs register
+    const regNombre = document.getElementById('regNombre');
+    const regEmail = document.getElementById('regEmail');
+    const regUsuario = document.getElementById('regUsuario');
+    const regClave = document.getElementById('regClave');
+    const regRole = document.getElementById('regRole');
+
+    function getUsers(){
+      try {
+        return JSON.parse(localStorage.getItem('users') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+    function saveUsers(users){
+      localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    // Mostrar/ocultar formularios
+    showRegisterBtn.addEventListener('click', () => {
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      title.textContent = 'Registro';
+    });
+
+    showLoginBtn.addEventListener('click', () => {
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      title.textContent = 'Iniciar sesión';
+    });
+
+    // LOGIN
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const usuario = loginUsuario.value.trim();
+      const clave = loginClave.value;
+
+      if (!usuario || !clave) {
+        alert('Completa usuario y contraseña.');
+        return;
+      }
+
+      const users = getUsers();
+      const found = users.find(u => u.usuario === usuario && u.clave === clave);
+
+      if (found) {
+        // Guardar sesión y redirigir
+        const current = { name: found.nombre || found.usuario, username: found.usuario, role: found.role || 'user' };
+        localStorage.setItem('currentUser', JSON.stringify(current));
+        // redirigir a index
+        location.href = 'index.html';
+      } else {
+        alert('Usuario o contraseña incorrectos. Regístrate si aún no tienes cuenta.');
+      }
+    });
+
+    // REGISTER
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const nombre = regNombre.value.trim();
+      const email = regEmail.value.trim().toLowerCase();
+      const usuario = regUsuario.value.trim();
+      const clave = regClave.value;
+      const role = regRole.value === 'admin' ? 'admin' : 'user';
+
+      if (!nombre || !email || !usuario || !clave) {
+        alert('Completa todos los campos.');
+        return;
+      }
+
+      const users = getUsers();
+      // validar unicidad de usuario/email
+      if (users.some(u => u.usuario === usuario)) {
+        alert('El nombre de usuario ya existe. Elige otro.');
+        return;
+      }
+      if (users.some(u => u.email === email)) {
+        alert('El correo ya está registrado. Usa otro o inicia sesión.');
+        return;
+      }
+
+      const nuevo = { nombre, email, usuario, clave, role };
+      users.push(nuevo);
+      saveUsers(users);
+
+      // Auto-login y redirigir
+      const current = { name: nombre, username: usuario, role };
+      localStorage.setItem('currentUser', JSON.stringify(current));
+      location.href = 'index.html';
+    });
+
+    // Opcional: crear cuenta demo admin si no hay usuarios (facilita pruebas)
+    (function ensureDemo(){
+      const users = getUsers();
+      if (users.length === 0) {
+        users.push({ nombre: 'Admin Demo', email: 'admin@demo.local', usuario: 'admin', clave: 'admin', role: 'admin' });
+        users.push({ nombre: 'Usuario Demo', email: 'user@demo.local', usuario: 'user', clave: 'user', role: 'user' });
+        saveUsers(users);
+      }
+    })();
+  </script>
+</body>
+</html>
