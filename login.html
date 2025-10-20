@@ -79,6 +79,7 @@
     <div class="store-name">MisSup</div>
     <h2 id="form-title">Iniciar sesión</h2>
 
+    <!-- Formulario de login -->
     <form id="login-form">
       <input type="text" name="usuario" placeholder="Usuario" required>
       <input type="password" name="clave" placeholder="Contraseña" required>
@@ -93,18 +94,16 @@
       </div>
     </form>
 
+    <!-- Formulario de registro -->
     <form id="register-form" class="hidden">
       <input type="text" name="nombre" placeholder="Nombre completo" required>
-      <input id="reg-email" type="email" name="email" placeholder="Correo electrónico" required>
+      <input type="email" name="email" id="reg-email" placeholder="Correo electrónico" required>
       <input type="text" name="usuario_reg" placeholder="Usuario" required>
       <input type="password" name="clave_reg" placeholder="Contraseña" required>
-
-      <!-- Select para elegir rol al registrarse -->
-      <select id="regRole" name="role" required>
-        <option value="user" selected>Usuario normal</option>
+      <select name="role" id="reg-role" required>
+        <option value="usuario" selected>Usuario normal</option>
         <option value="admin">Administrador</option>
       </select>
-
       <div class="actions">
         <input type="submit" value="Registrar">
         <button type="button" class="toggle" id="show-login">Volver</button>
@@ -120,16 +119,15 @@
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     const title = document.getElementById('form-title');
-
     const regEmailInput = document.getElementById('reg-email');
-    const regRoleSelect = document.getElementById('regRole');
+    const regRoleSelect = document.getElementById('reg-role');
 
     // Mostrar / ocultar formularios
     showRegisterBtn.addEventListener('click', () => {
       loginForm.classList.add('hidden');
       registerForm.classList.remove('hidden');
       title.textContent = 'Registro';
-      validateEmailForAdmin(); // aplicar validación inmediata
+      validateEmailForAdmin();
     });
 
     showLoginBtn.addEventListener('click', () => {
@@ -138,13 +136,13 @@
       title.textContent = 'Iniciar sesión';
     });
 
-    // Deshabilita la opción admin si el email no coincide con el dominio permitido.
+    // Validar dominio para rol admin
     function validateEmailForAdmin() {
-      const email = (regEmailInput.value || '').trim().toLowerCase();
+      const email = regEmailInput.value.trim().toLowerCase();
       const adminOption = regRoleSelect.querySelector('option[value="admin"]');
       if (!email.endsWith(DOMAIN_ALLOWED)) {
         adminOption.disabled = true;
-        if (regRoleSelect.value === 'admin') regRoleSelect.value = 'user';
+        if (regRoleSelect.value === 'admin') regRoleSelect.value = 'usuario';
       } else {
         adminOption.disabled = false;
       }
@@ -152,71 +150,52 @@
 
     regEmailInput.addEventListener('input', validateEmailForAdmin);
 
-    // Interceptar submit para validar en el cliente antes de enviar al servidor
+    // Enviar login
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(loginForm);
+      fetch('/login', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.mensaje || data.error);
+        if (data.user) {
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          // Aquí podrías redirigir a otra página si lo deseas
+        }
+      })
+      .catch(() => alert('Error al conectar con el servidor'));
+    });
+
+    // Enviar registro
     registerForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const email = (regEmailInput.value || '').trim().toLowerCase();
+      const email = regEmailInput.value.trim().toLowerCase();
       const role = regRoleSelect.value;
 
       if (role === 'admin' && !email.endsWith(DOMAIN_ALLOWED)) {
-        alert('Solo correos con dominio ' + DOMAIN_ALLOWED + ' pueden registrarse como administradores.');
+        alert('Solo correos @tecmilenio.mx pueden registrarse como administradores.');
         return;
       }
 
       const formData = new FormData(registerForm);
-      fetch('/register', { method: 'POST', body: formData })
-        .then(res => res.json().catch(() => ({ error: 'Respuesta inválida del servidor' })))
-        .then(data => {
-          if (data.error) {
-            alert(data.error);
-            return;
-          }
-          if (data.mensaje) {
-            alert(data.mensaje);
-            registerForm.reset();
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-            title.textContent = 'Iniciar sesión';
-          } else {
-            // Si servidor devuelve objeto usuario o token, adaptarlo aquí.
-            alert('Registro completado.');
-            registerForm.reset();
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
-            title.textContent = 'Iniciar sesión';
-          }
-        })
-        .catch(() => alert('Error al conectar con el servidor'));
-    });
-
-    // Login: enviar al servidor
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(loginForm);
-      fetch('/login', { method: 'POST', body: formData })
-        .then(res => res.json().catch(() => ({ error: 'Respuesta inválida del servidor' })))
-        .then(data => {
-          if (data.error) {
-            alert(data.error);
-            return;
-          }
-          if (data.mensaje) {
-            // servidor puede indicar éxito y retornar info; ajustar según backend
-            alert(data.mensaje);
-            if (data.user) {
-              // guardar sesión en localStorage y redirigir
-              localStorage.setItem('currentUser', JSON.stringify(data.user));
-              location.href = 'index.html';
-            }
-          } else if (data.user) {
-            localStorage.setItem('currentUser', JSON.stringify(data.user));
-            location.href = 'index.html';
-          } else {
-            alert('Inicio de sesión completado.');
-            location.href = 'index.html';
-          }
-        })
-        .catch(() => alert('Error al conectar con el servidor'));
+      fetch('/register', {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.mensaje || data.error);
+        if (data.mensaje) {
+          registerForm.reset();
+          registerForm.classList.add('hidden');
+          loginForm.classList.remove('hidden');
+          title.textContent = 'Iniciar sesión';
+        }
+      })
+      .catch(() => alert('Error al conectar con el servidor'));
     });
   </script>
 </body>
