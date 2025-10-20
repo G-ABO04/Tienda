@@ -9,6 +9,113 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
     body { background: #f2f4f8; min-height: 100vh; }
 
+    /* ======= PANTALLA LOGIN/REGISTRO ======= */
+    .login-screen {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #002147, #0047ab);
+    }
+
+    .login-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .login-header h1 {
+      color: #002147;
+      margin-bottom: 8px;
+    }
+
+    .login-header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 12px;
+      cursor: pointer;
+      color: #666;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      color: #002147;
+      border-bottom: 2px solid #002147;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #002147;
+      font-weight: bold;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #002147;
+    }
+
+    .btn-login {
+      width: 100%;
+      background: #002147;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      background: #00152d;
+    }
+
+    .role-info {
+      background: #e6f2ff;
+      padding: 12px;
+      border-radius: 5px;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #002147;
+    }
+
+    .role-info ul {
+      margin-left: 15px;
+      margin-top: 5px;
+    }
+
     /* ======= SIDEBAR ======= */
     .sidebar {
       position: fixed;
@@ -67,6 +174,10 @@
     .btn-logout:hover { background: #e04a4a; }
 
     /* ======= CONTENIDO ======= */
+    .main-app {
+      display: none;
+    }
+
     .main-content {
       margin-left: 240px;
       padding: 25px;
@@ -136,53 +247,186 @@
 
     .btn-cart { color: #007bff; border-color: #007bff; }
     .btn-cart:hover { background: #007bff; color: white; }
+
+    .btn-edit { color: #002147; border-color: #002147; }
+    .btn-edit:hover { background: #002147; color: white; }
+
+    .btn-delete { color: #ff6666; border-color: #ff6666; }
+    .btn-delete:hover { background: #ff6666; color: white; }
+
+    /* ======= OVERLAY FORMULARIO ======= */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .form-container {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .form-container h3 {
+      color: #002147;
+      margin-bottom: 20px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: #666;
+      border: 1px solid #ddd;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+      background: #e0e0e0;
+    }
   </style>
 </head>
 <body>
-  <!-- ======= SIDEBAR ======= -->
-  <aside class="sidebar">
-    <div>
-      <div class="sidebar-header">
-        <h2>MisSup</h2>
-        <p id="sidebarUser">Usuario</p>
+  <!-- ======= PANTALLA LOGIN/REGISTRO ======= -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-container">
+      <div class="login-header">
+        <h1>MisSup</h1>
+        <p>Inicia sesión o regístrate para acceder</p>
       </div>
 
-      <ul class="sidebar-menu">
-        <li><a href="#" class="active" id="menuCatalogo">Catálogo</a></li>
-        <li><a href="#" id="menuCarrito">🛒 Carrito</a></li>
-        <li><a href="#" id="menuHistorial">🧾 Historial</a></li>
-      </ul>
-    </div>
+      <div class="tabs">
+        <div class="tab active" id="loginTab">Iniciar Sesión</div>
+        <div class="tab" id="registerTab">Registrarse</div>
+      </div>
 
-    <div class="sidebar-footer">
-      <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
-    </div>
-  </aside>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" required>
+        </div>
+        <button type="submit" class="btn-login">Iniciar Sesión</button>
+      </form>
 
-  <!-- ======= CONTENIDO PRINCIPAL ======= -->
-  <main class="main-content">
-    <div class="page-header">
-      <h1>Catálogo de Productos</h1>
+      <form id="registerForm" style="display: none;">
+        <div class="form-group">
+          <label for="regName">Nombre completo</label>
+          <input type="text" id="regName" required>
+        </div>
+        <div class="form-group">
+          <label for="regEmail">Correo electrónico</label>
+          <input type="email" id="regEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="regPassword">Contraseña</label>
+          <input type="password" id="regPassword" required>
+        </div>
+        <div class="form-group">
+          <label for="regConfirmPassword">Confirmar contraseña</label>
+          <input type="password" id="regConfirmPassword" required>
+        </div>
+        <button type="submit" class="btn-login">Registrarse</button>
+      </form>
+
+      <div class="role-info">
+        <strong>Información sobre roles:</strong>
+        <ul>
+          <li>Usuarios con dominio <strong>@tecmilenio.mx</strong> serán administradores</li>
+          <li>Otros dominios tendrán acceso como usuarios normales</li>
+          <li>Los administradores pueden agregar, editar y eliminar productos</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= APLICACIÓN PRINCIPAL ======= -->
+  <div class="main-app" id="mainApp">
+    <!-- ======= SIDEBAR ======= -->
+    <aside class="sidebar">
       <div>
-        <span id="userName">Usuario</span> |
-        <span class="user-role user" id="userRole">Usuario</span>
+        <div class="sidebar-header">
+          <h2>MisSup</h2>
+          <p id="sidebarUser">Usuario</p>
+        </div>
+
+        <ul class="sidebar-menu">
+          <li><a href="#" class="active" id="menuCatalogo">Catálogo</a></li>
+          <li><a href="#" id="menuCarrito">🛒 Carrito</a></li>
+          <li><a href="#" id="menuHistorial">🧾 Historial</a></li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </aside>
+
+    <!-- ======= CONTENIDO PRINCIPAL ======= -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Catálogo de Productos</h1>
+        <div>
+          <span id="userName">Usuario</span> |
+          <span class="user-role user" id="userRole">Usuario</span>
+        </div>
+      </div>
+
+      <div id="adminActions" style="margin-top:20px; display:none;">
+        <button class="btn-primary" id="btnAgregar">➕ Agregar producto</button>
+      </div>
+
+      <div class="products-grid" id="productosGrid"></div>
+    </main>
+  </div>
+
+  <!-- ======= FORMULARIO PRODUCTOS ======= -->
+  <div class="overlay" id="overlay">
+    <div class="form-container">
+      <h3 id="formTitle">Agregar Producto</h3>
+      <input type="hidden" id="productId">
+      <div class="form-group">
+        <label for="productName">Nombre del producto</label>
+        <input type="text" id="productName" required>
+      </div>
+      <div class="form-group">
+        <label for="productCategory">Categoría</label>
+        <input type="text" id="productCategory" required>
+      </div>
+      <div class="form-group">
+        <label for="productPrice">Precio</label>
+        <input type="number" id="productPrice" min="0" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label for="productImage">URL de imagen (opcional)</label>
+        <input type="text" id="productImage">
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="btnGuardar">Guardar</button>
+        <button class="btn-cancel" id="btnCancelar">Cancelar</button>
       </div>
     </div>
-
-    <div id="adminActions" style="margin-top:20px; display:none;">
-      <button class="btn-primary" id="btnAgregar">➕ Agregar producto</button>
-    </div>
-
-    <div class="products-grid" id="productosGrid"></div>
-  </main>
+  </div>
 
   <script>
     // ========= DATOS SIMULADOS =========
-    let usuario = {
-      nombre: "Victor",
-      esAdmin: true // pon false si es usuario normal
-    };
-
+    let usuario = null;
     let productos = [
       {id: 1, nombre: "Laptop HP", categoria: "Tecnología", precio: 18000},
       {id: 2, nombre: "Audífonos JBL", categoria: "Audio", precio: 1200},
@@ -192,25 +436,131 @@
 
     let carrito = [];
     let historial = [];
+    let editandoProducto = false;
 
     // ========= ELEMENTOS =========
+    const loginScreen = document.getElementById("loginScreen");
+    const mainApp = document.getElementById("mainApp");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const loginTab = document.getElementById("loginTab");
+    const registerTab = document.getElementById("registerTab");
     const userName = document.getElementById("userName");
     const userRole = document.getElementById("userRole");
     const sidebarUser = document.getElementById("sidebarUser");
     const productosGrid = document.getElementById("productosGrid");
     const adminActions = document.getElementById("adminActions");
+    const btnAgregar = document.getElementById("btnAgregar");
+    const overlay = document.getElementById("overlay");
+    const formTitle = document.getElementById("formTitle");
+    const productId = document.getElementById("productId");
+    const productName = document.getElementById("productName");
+    const productCategory = document.getElementById("productCategory");
+    const productPrice = document.getElementById("productPrice");
+    const productImage = document.getElementById("productImage");
+    const btnGuardar = document.getElementById("btnGuardar");
+    const btnCancelar = document.getElementById("btnCancelar");
 
-    // ========= INICIO =========
-    document.addEventListener("DOMContentLoaded", () => {
+    // ========= AUTENTICACIÓN =========
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+    });
+
+    registerTab.addEventListener('click', () => {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      registerForm.style.display = 'block';
+      loginForm.style.display = 'none';
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (email && password) {
+        iniciarSesion(email, password);
+      } else {
+        alert('Por favor, completa todos los campos');
+      }
+    });
+
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+      
+      if (name && email && password) {
+        registrarUsuario(name, email, password);
+      } else {
+        alert('Por favor, completa todos los campos');
+      }
+    });
+
+    function iniciarSesion(email, password) {
+      // Determinar si es admin basado en el dominio del correo
+      const esAdmin = email.endsWith('@tecmilenio.mx');
+      
+      // Guardar información del usuario
+      usuario = {
+        nombre: email.split('@')[0],
+        email: email,
+        esAdmin: esAdmin
+      };
+      
+      // Actualizar la interfaz
+      actualizarInterfazUsuario();
+      
+      // Mostrar el contenido principal
+      loginScreen.style.display = 'none';
+      mainApp.style.display = 'block';
+    }
+
+    function registrarUsuario(nombre, email, password) {
+      // Determinar si es admin basado en el dominio del correo
+      const esAdmin = email.endsWith('@tecmilenio.mx');
+      
+      // Guardar información del usuario
+      usuario = {
+        nombre: nombre,
+        email: email,
+        esAdmin: esAdmin
+      };
+      
+      // Actualizar la interfaz
+      actualizarInterfazUsuario();
+      
+      // Mostrar el contenido principal
+      loginScreen.style.display = 'none';
+      mainApp.style.display = 'block';
+    }
+
+    function actualizarInterfazUsuario() {
       userName.textContent = usuario.nombre;
       sidebarUser.textContent = usuario.nombre;
       userRole.textContent = usuario.esAdmin ? "Administrador" : "Usuario";
       userRole.className = usuario.esAdmin ? "user-role admin" : "user-role user";
-      if (usuario.esAdmin) adminActions.style.display = "block";
+      
+      if (usuario.esAdmin) {
+        adminActions.style.display = "block";
+      } else {
+        adminActions.style.display = "none";
+      }
+      
       mostrarProductos();
-    });
+    }
 
-    // ========= FUNCIONES =========
+    // ========= FUNCIONES PRINCIPALES =========
     function mostrarProductos() {
       productosGrid.innerHTML = "";
       productos.forEach(p => {
@@ -243,20 +593,90 @@
 
     function editar(id) {
       const p = productos.find(x => x.id === id);
-      alert(`Editar producto: ${p.nombre}`);
+      editandoProducto = true;
+      formTitle.textContent = "Editar Producto";
+      productId.value = p.id;
+      productName.value = p.nombre;
+      productCategory.value = p.categoria;
+      productPrice.value = p.precio;
+      productImage.value = p.imagen || "";
+      overlay.style.display = "flex";
     }
 
     function borrar(id) {
-      productos = productos.filter(x => x.id !== id);
-      mostrarProductos();
+      if (confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+        productos = productos.filter(x => x.id !== id);
+        mostrarProductos();
+      }
     }
 
+    // ========= GESTIÓN DE PRODUCTOS =========
+    btnAgregar.addEventListener('click', () => {
+      editandoProducto = false;
+      formTitle.textContent = "Agregar Producto";
+      productId.value = "";
+      productName.value = "";
+      productCategory.value = "";
+      productPrice.value = "";
+      productImage.value = "";
+      overlay.style.display = "flex";
+    });
+
+    btnGuardar.addEventListener('click', () => {
+      const id = productId.value;
+      const nombre = productName.value;
+      const categoria = productCategory.value;
+      const precio = parseFloat(productPrice.value);
+      const imagen = productImage.value;
+
+      if (!nombre || !categoria || !precio) {
+        alert("Por favor, completa todos los campos obligatorios");
+        return;
+      }
+
+      if (editandoProducto) {
+        // Editar producto existente
+        const index = productos.findIndex(p => p.id == id);
+        if (index !== -1) {
+          productos[index] = {
+            id: parseInt(id),
+            nombre,
+            categoria,
+            precio,
+            imagen
+          };
+        }
+      } else {
+        // Agregar nuevo producto
+        const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+        productos.push({
+          id: nuevoId,
+          nombre,
+          categoria,
+          precio,
+          imagen
+        });
+      }
+
+      mostrarProductos();
+      overlay.style.display = "none";
+    });
+
+    btnCancelar.addEventListener('click', () => {
+      overlay.style.display = "none";
+    });
+
+    // ========= NAVEGACIÓN =========
     document.getElementById("menuCarrito").onclick = () => {
       mostrarLista("Carrito de compras", carrito);
     };
 
     document.getElementById("menuHistorial").onclick = () => {
       mostrarLista("Historial de compras", historial);
+    };
+
+    document.getElementById("menuCatalogo").onclick = () => {
+      mostrarProductos();
     };
 
     function mostrarLista(titulo, lista) {
@@ -267,9 +687,19 @@
     }
 
     document.getElementById("logoutBtn").onclick = () => {
-      alert("Cerraste sesión");
-      location.reload();
+      usuario = null;
+      loginScreen.style.display = "flex";
+      mainApp.style.display = "none";
+      loginForm.reset();
+      registerForm.reset();
+      loginTab.click();
     };
+
+    // ========= INICIO =========
+    document.addEventListener("DOMContentLoaded", () => {
+      loginScreen.style.display = "flex";
+      mainApp.style.display = "none";
+    });
   </script>
 </body>
 </html>
