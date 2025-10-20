@@ -77,12 +77,6 @@
     const regEmailInput = document.getElementById('reg-email');
     const regRoleSelect = document.getElementById('regRole');
 
-    // Si ya hay usuario guardado, redirige al index directamente
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      window.location.href = 'index.html';
-    }
-
     // Cambiar entre login y registro
     showRegisterBtn.addEventListener('click', () => {
       loginForm.classList.add('hidden');
@@ -106,18 +100,24 @@
         adminOption.disabled = false;
       }
     }
-
     regEmailInput.addEventListener('input', validateEmailForAdmin);
 
-    // Registro
+    // Registro (solo guarda en localStorage)
     registerForm.addEventListener('submit', e => {
       e.preventDefault();
-      const email = (regEmailInput.value || '').trim().toLowerCase();
+      const nombre = registerForm.nombre.value;
+      const email = regEmailInput.value.trim().toLowerCase();
+      const usuario = registerForm.usuario_reg.value;
+      const clave = registerForm.clave_reg.value;
       const role = regRoleSelect.value;
+
       if (role === 'admin' && !email.endsWith(DOMAIN_ALLOWED)) {
         alert('Solo correos con dominio ' + DOMAIN_ALLOWED + ' pueden registrarse como administradores.');
         return;
       }
+
+      // Guardamos usuario en localStorage
+      localStorage.setItem('currentUser', JSON.stringify({ nombre, email, usuario, role }));
       alert('Registro exitoso. Ahora inicia sesión.');
       registerForm.reset();
       registerForm.classList.add('hidden');
@@ -128,15 +128,23 @@
     // Login
     loginForm.addEventListener('submit', e => {
       e.preventDefault();
-      const formData = new FormData(loginForm);
-      const usuario = formData.get('usuario');
-      const tipo = formData.get('tipo');
+      const usuario = loginForm.usuario.value;
+      const clave = loginForm.clave.value;
+      const tipo = loginForm.tipo.value;
 
-      // Guardar usuario en localStorage
-      localStorage.setItem('currentUser', JSON.stringify({ usuario, tipo }));
+      // Verificar que haya un usuario registrado
+      const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!savedUser) {
+        alert('Primero debes registrarte.');
+        return;
+      }
 
-      alert('Inicio de sesión exitoso');
-      window.location.href = 'index.html';
+      if (usuario === savedUser.usuario && tipo === savedUser.role) {
+        alert('Inicio de sesión exitoso');
+        window.location.href = 'index.html';
+      } else {
+        alert('Usuario o tipo incorrecto');
+      }
     });
   </script>
 </body>
