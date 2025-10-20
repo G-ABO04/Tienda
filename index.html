@@ -457,27 +457,63 @@
       margin-top: 10px;
     }
     
-    /* ======= FORMULARIO TARJETA DE CRÉDITO ======= */
-    .credit-card-form {
+    /* ======= HISTORIAL DE COMPRAS ======= */
+    .ticket {
       background: white;
       border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
     }
     
-    .card-icon {
-      font-size: 24px;
-      margin-right: 10px;
-    }
-    
-    .card-input-group {
+    .ticket-header {
+      background: #002147;
+      color: white;
+      padding: 15px 20px;
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
     }
     
-    .card-input-group .form-group {
-      flex: 1;
+    .ticket-id {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    .ticket-date {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .ticket-body {
+      padding: 20px;
+    }
+    
+    .ticket-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed #eee;
+    }
+    
+    .ticket-item:last-child {
+      border-bottom: none;
+    }
+    
+    .ticket-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 2px solid #002147;
+    }
+    
+    .empty-history {
+      text-align: center;
+      padding: 40px 0;
+      color: #666;
     }
   </style>
 </head>
@@ -653,26 +689,22 @@
           </div>
         </div>
         
-        <!-- FORMULARIO DE TARJETA DE CRÉDITO -->
-        <div class="credit-card-form" id="creditCardForm">
-          <h4>💳 Información de Tarjeta de Crédito</h4>
+        <div class="payment-form" id="creditCardForm">
           <div class="form-group">
             <label for="cardName">Nombre en la tarjeta</label>
-            <input type="text" id="cardName" placeholder="Ej. Juan Pérez García" required>
+            <input type="text" id="cardName" required>
           </div>
           <div class="form-group">
             <label for="cardNumber">Número de tarjeta</label>
-            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" required>
+            <input type="text" id="cardNumber" required>
           </div>
-          <div class="card-input-group">
-            <div class="form-group">
-              <label for="cardExpiry">Fecha de expiración</label>
-              <input type="text" id="cardExpiry" placeholder="MM/AA" maxlength="5" required>
-            </div>
-            <div class="form-group">
-              <label for="cardCVC">CVC</label>
-              <input type="text" id="cardCVC" placeholder="123" maxlength="3" required>
-            </div>
+          <div class="form-group">
+            <label for="cardExpiry">Fecha de expiración</label>
+            <input type="text" id="cardExpiry" placeholder="MM/AA" required>
+          </div>
+          <div class="form-group">
+            <label for="cardCVC">CVC</label>
+            <input type="text" id="cardCVC" required>
           </div>
         </div>
       </div>
@@ -706,6 +738,7 @@
     let carrito = [];
     let historial = [];
     let editandoProducto = false;
+    let compraIdCounter = 1;
 
     // ========= ELEMENTOS =========
     const loginScreen = document.getElementById("loginScreen");
@@ -967,4 +1000,91 @@
       
       let html = `
         <div class="cart-container">
-          <h2 style="color:#002147;
+          <h2 style="color:#002147; margin-bottom:20px;">Productos en tu carrito</h2>
+      `;
+      
+      let total = 0;
+      carrito.forEach((item, index) => {
+        html += `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.nombre}</div>
+              <div class="cart-item-price">$${item.precio}</div>
+            </div>
+            <div class="cart-item-actions">
+              <button class="btn-remove" onclick="eliminarDelCarrito(${index})">Eliminar</button>
+            </div>
+          </div>
+        `;
+        total += item.precio;
+      });
+      
+      html += `
+          <div class="cart-total">
+            <span>Total:</span>
+            <span>$${total}</span>
+          </div>
+          <button class="btn-checkout" onclick="mostrarFormularioPago()">Proceder al Pago</button>
+        </div>
+      `;
+      
+      contentArea.innerHTML = html;
+    }
+
+    function eliminarDelCarrito(index) {
+      carrito.splice(index, 1);
+      actualizarContadorCarrito();
+      mostrarCarrito();
+    }
+
+    // ========= FORMULARIO DE PAGO =========
+    function mostrarFormularioPago() {
+      // Configurar métodos de pago
+      document.querySelectorAll('.payment-method').forEach(method => {
+        method.addEventListener('click', function() {
+          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+      
+      // Establecer el primer método como seleccionado por defecto
+      document.querySelector('.payment-method').classList.add('selected');
+      
+      // Actualizar resumen de compra
+      let summaryHtml = '';
+      let total = 0;
+      
+      carrito.forEach(item => {
+        summaryHtml += `
+          <div class="payment-summary-item">
+            <span>${item.nombre}</span>
+            <span>$${item.precio}</span>
+          </div>
+        `;
+        total += item.precio;
+      });
+      
+      paymentSummaryItems.innerHTML = summaryHtml;
+      paymentTotal.textContent = `$${total}`;
+      
+      // Mostrar overlay de pago
+      paymentOverlay.style.display = "flex";
+    }
+
+    btnConfirmPayment.addEventListener('click', () => {
+      // Validar formulario
+      const shippingName = document.getElementById('shippingName').value;
+      const shippingPhone = document.getElementById('shippingPhone').value;
+      const shippingAddress = document.getElementById('shippingAddress').value;
+      const shippingCity = document.getElementById('shippingCity').value;
+      const shippingZip = document.getElementById('shippingZip').value;
+      
+      if (!shippingName || !shippingPhone || !shippingAddress || !shippingCity || !shippingZip) {
+        alert('Por favor, completa todos los campos de envío');
+        return;
+      }
+      
+      // En una aplicación real, aquí procesaríamos el pago
+      alert('¡Pago procesado exitosamente! Gracias por tu compra.');
+      
+      // Agregar al
