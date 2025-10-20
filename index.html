@@ -1062,4 +1062,14 @@
       document.querySelectorAll('.sidebar-menu li a').forEach(item => {
         item.classList.remove('active');
       });
-      document.getElementById("menuHistorial").
+      document.getElementById("menuHistorial").classList.add('active');
+      mostrarHistorial();
+    });
+
+    document.getElementById("menuCatalogo").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCatalogo").classList.add('active');
+      mostrarProductos();
+     
