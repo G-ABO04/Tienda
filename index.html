@@ -119,19 +119,43 @@
     const loginBtn = document.getElementById('loginBtn');
     const userArea = document.getElementById('userArea');
 
-    let productos = [];
-    let currentUser = JSON.parse(localStorage.getItem('currentUser') || "null");
+    let productos = JSON.parse(localStorage.getItem('productos')) || [];
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     let editandoId = null;
 
+    // Datos de ejemplo si no hay productos
+    if (productos.length === 0) {
+      productos = [
+        {
+          id: 1,
+          nombre: "Laptop Gaming",
+          precio: "1200.00",
+          categoria: "electronicos",
+          imagen: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=240&fit=crop",
+          descripcion: "Laptop potente para gaming y trabajo"
+        },
+        {
+          id: 2,
+          nombre: "Camiseta Básica",
+          precio: "25.99",
+          categoria: "ropa",
+          imagen: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=240&fit=crop",
+          descripcion: "Camiseta 100% algodón, varios colores"
+        }
+      ];
+      guardarEnLocalStorage();
+    }
+
     updateAuthUI();
+    renderProductos();
 
     addProductBtn.onclick = () => openForm();
 
     guardarBtn.onclick = () => {
       const nombre = document.getElementById('nombre').value.trim();
       const precio = document.getElementById('precio').value;
-      const categoria = document.getElementById('categoria').value.trim() || 'general';
-      const imagen = document.getElementById('imagen').value.trim() || 'https://via.placeholder.com/400x240?text=Sin+imagen';
+      const categoria = document.getElementById('categoria').value.trim().toLowerCase() || 'general';
+      const imagen = document.getElementById('imagen').value.trim() || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=240&fit=crop&text=Sin+imagen';
       const descripcion = document.getElementById('descripcion').value.trim();
 
       if (!nombre || !precio) return alert("Completa los campos obligatorios.");
@@ -157,6 +181,8 @@
           descripcion
         });
       }
+      
+      guardarEnLocalStorage();
       renderProductos();
       closeForm();
     };
@@ -192,14 +218,14 @@
       productsGrid.innerHTML = '';
       if (list.length === 0) {
         totalProducts.textContent = "0 productos";
-        productsGrid.innerHTML = "<p style='color:#666'>No hay productos.</p>";
+        productsGrid.innerHTML = "<p style='color:#666;grid-column:1/-1;text-align:center;padding:40px;'>No hay productos en esta categoría.</p>";
         return;
       }
       list.forEach(p => {
         const card = document.createElement('div');
         card.className = "product-card";
         card.innerHTML = `
-          <img src="${p.imagen}" alt="${p.nombre}">
+          <img src="${p.imagen}" alt="${p.nombre}" onerror="this.src='https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=240&fit=crop&text=Error+imagen'">
           <div class="info">
             <div class="name">${p.nombre}</div>
             <div class="price">$${p.precio}</div>
@@ -218,13 +244,15 @@
     function updateAuthUI() {
       if (currentUser?.role === "admin") {
         addProductBtn.disabled = false;
+        addProductBtn.classList.remove('disabled');
       } else {
         addProductBtn.disabled = true;
+        addProductBtn.classList.add('disabled');
       }
 
       if (!currentUser) {
         userArea.innerHTML = '<button id="loginBtn">Iniciar sesión</button>';
-        document.getElementById('loginBtn').onclick = () => location.href = "login.html";
+        document.getElementById('loginBtn').onclick = mostrarLogin;
       } else {
         userArea.innerHTML = `
           <div class="user-badge">${currentUser.name} (${currentUser.role})</div>
@@ -237,13 +265,47 @@
           renderProductos();
         };
       }
-      renderProductos();
     }
 
     function filtrarCategoria(cat){
       if (cat === "all") return renderProductos();
-      renderProductos(productos.filter(p => p.categoria === cat));
+      const filtered = productos.filter(p => p.categoria === cat);
+      renderProductos(filtered);
     }
+
+    function guardarEnLocalStorage() {
+      localStorage.setItem('productos', JSON.stringify(productos));
+    }
+
+    // Sistema de login integrado
+    function mostrarLogin() {
+      const usuario = prompt("Usuario (admin/user):");
+      if (!usuario) return;
+      
+      const contraseña = prompt("Contraseña:");
+      
+      // Credenciales predefinidas
+      if (usuario === "admin" && contraseña === "admin123") {
+        currentUser = { name: "Administrador", role: "admin" };
+      } else if (usuario === "user" && contraseña === "user123") {
+        currentUser = { name: "Usuario", role: "user" };
+      } else {
+        alert("❌ Credenciales incorrectas\n\nPrueba:\nUsuario: admin / Contraseña: admin123\nUsuario: user / Contraseña: user123");
+        return;
+      }
+      
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      updateAuthUI();
+      renderProductos();
+      alert(`✅ Bienvenido ${currentUser.name}`);
+    }
+
+    // Manejar clic en login
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'loginBtn') {
+        mostrarLogin();
+      }
+    });
   </script>
 </body>
 </html>
