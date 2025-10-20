@@ -514,25 +514,6 @@
     </main>
   </div>
 
-  <!-- OVERLAY + FORMULARIO DE PRODUCTOS -->
-  <div class="overlay" id="overlay" aria-hidden="true">
-    <form class="form-container" id="formContainer">
-      <h3 id="formTitle">Agregar nuevo producto</h3>
-      <input type="hidden" id="productId" />
-      <input type="text" id="nombre" placeholder="Nombre del producto" required />
-      <div class="form-row">
-        <input type="number" id="precio" placeholder="Precio" min="0" step="0.01" required />
-        <input type="text" id="categoria" placeholder="Categoría (ej: ropa)" required />
-      </div>
-      <input type="text" id="imagen" placeholder="URL de imagen (opcional)" />
-      <textarea id="descripcion" rows="3" placeholder="Descripción (opcional)"></textarea>
-      <div class="form-actions">
-        <button class="btn-primary" id="guardarBtn">Guardar</button>
-        <button class="btn-cancel" id="cancelarBtn" type="button">Cancelar</button>
-      </div>
-    </form>
-  </div>
-
   <script>
     // Datos de ejemplo para productos
     const productosEjemplo = [
@@ -579,10 +560,6 @@
     const totalProducts = document.getElementById('totalProducts');
     const userName = document.getElementById('userName');
     const userRole = document.getElementById('userRole');
-    const overlay = document.getElementById('overlay');
-    const formContainer = document.getElementById('formContainer');
-    const cancelarBtn = document.getElementById('cancelarBtn');
-    const guardarBtn = document.getElementById('guardarBtn');
 
     // Cambiar entre login y registro
     loginTab.addEventListener('click', () => {
