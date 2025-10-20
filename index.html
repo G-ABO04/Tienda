@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mi Catálogo - Panel</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/auth.css">
+</head>
+<body>
+
+  <!-- BARRA LATERAL -->
+  <div id="sidebar-container"></div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+    <div class="page-header">
+      <div class="title">
+        <h1>Catálogo público</h1>
+        <div style="font-size:13px;color:#6b7888">Ver y administrar productos</div>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="totalProducts" style="font-weight:600;color:#334e7a">0 productos</div>
+        <div class="user-area" id="userArea">
+          <button id="loginBtn">Iniciar sesión</button>
+        </div>
+      </div>
+    </div>
+
+    <section class="products-grid" id="productsGrid">
+      <!-- Product cards se inyectan aquí -->
+    </section>
+  </main>
+
+  <!-- OVERLAY + FORMULARIO -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <form class="form-container" id="formContainer" onsubmit="return false">
+      <h3 id="formTitle">Agregar nuevo producto</h3>
+      <input type="hidden" id="productId" />
+      <input type="text" id="nombre" placeholder="Nombre del producto" required />
+      <div class="form-row">
+        <input type="number" id="precio" placeholder="Precio" min="0" step="0.01" required />
+        <input type="text" id="categoria" placeholder="Categoría (ej: ropa)" required />
+      </div>
+      <input type="text" id="imagen" placeholder="URL de imagen (opcional)" />
+      <textarea id="descripcion" rows="3" placeholder="Descripción (opcional)"></textarea>
+      <div class="form-actions">
+        <button class="btn-primary" id="guardarBtn">Guardar</button>
+        <button class="btn-cancel" id="cancelarBtn" type="button">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- LOGIN OVERLAY -->
+  <div class="overlay" id="loginOverlay" aria-hidden="true" style="z-index:1700;">
+    <form class="form-container login-form" id="loginForm" onsubmit="return false">
+      <h3>Iniciar sesión</h3>
+      <div class="form-row">
+        <input id="loginEmail" type="email" placeholder="Correo electrónico" required />
+        <input id="loginPassword" type="password" placeholder="Contraseña" required />
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="loginSubmit">Entrar</button>
+        <button class="btn-cancel" id="loginCancel" type="button">Cancelar</button>
+      </div>
+      <div style="font-size:12px;color:#666;margin-top:8px">
+        Nota: Solo usuarios con dominio @tecmilenio.mx pueden ser administradores.
+        Otros dominios tendrán acceso como usuarios normales.
+      </div>
+    </form>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="scripts/auth.js"></script>
+  <script src="scripts/products.js"></script>
+  <script src="scripts/main.js"></script>
+</body>
+</html>
