@@ -456,65 +456,6 @@
       padding-top: 10px;
       margin-top: 10px;
     }
-    
-    /* ======= HISTORIAL DE COMPRAS ======= */
-    .ticket {
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-      overflow: hidden;
-    }
-    
-    .ticket-header {
-      background: #002147;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .ticket-id {
-      font-weight: bold;
-      font-size: 16px;
-    }
-    
-    .ticket-date {
-      font-size: 14px;
-      opacity: 0.9;
-    }
-    
-    .ticket-body {
-      padding: 20px;
-    }
-    
-    .ticket-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px dashed #eee;
-    }
-    
-    .ticket-item:last-child {
-      border-bottom: none;
-    }
-    
-    .ticket-total {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      font-size: 18px;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 2px solid #002147;
-    }
-    
-    .empty-history {
-      text-align: center;
-      padding: 40px 0;
-      color: #666;
-    }
   </style>
 </head>
 <body>
@@ -738,7 +679,6 @@
     let carrito = [];
     let historial = [];
     let editandoProducto = false;
-    let compraIdCounter = 1;
 
     // ========= ELEMENTOS =========
     const loginScreen = document.getElementById("loginScreen");
@@ -887,7 +827,7 @@
               ${usuario.esAdmin
                 ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
                    <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
-                : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`
+                : <button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>
               }
             </div>
           </div>
@@ -900,7 +840,7 @@
       const p = productos.find(x => x.id === id);
       carrito.push(p);
       actualizarContadorCarrito();
-      alert(`${p.nombre} agregado al carrito`);
+      alert(${p.nombre} agregado al carrito);
     }
 
     function editar(id) {
@@ -1065,7 +1005,7 @@
       });
       
       paymentSummaryItems.innerHTML = summaryHtml;
-      paymentTotal.textContent = `$${total}`;
+      paymentTotal.textContent = $${total};
       
       // Mostrar overlay de pago
       paymentOverlay.style.display = "flex";
@@ -1087,4 +1027,48 @@
       // En una aplicación real, aquí procesaríamos el pago
       alert('¡Pago procesado exitosamente! Gracias por tu compra.');
       
-      // Agregar al
+      // Agregar al historial
+      const compra = {
+        fecha: new Date().toLocaleDateString(),
+        productos: [...carrito],
+        total: carrito.reduce((sum, item) => sum + item.precio, 0)
+      };
+      historial.push(compra);
+      
+      // Limpiar carrito
+      carrito = [];
+      actualizarContadorCarrito();
+      
+      // Cerrar formulario y volver al catálogo
+      paymentOverlay.style.display = "none";
+      mostrarProductos();
+      pageTitle.textContent = "Catálogo de Productos";
+    });
+
+    btnCancelPayment.addEventListener('click', () => {
+      paymentOverlay.style.display = "none";
+    });
+
+    // ========= NAVEGACIÓN =========
+    document.getElementById("menuCarrito").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCarrito").classList.add('active');
+      mostrarCarrito();
+    });
+
+    document.getElementById("menuHistorial").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuHistorial").classList.add('active');
+      mostrarHistorial();
+    });
+
+    document.getElementById("menuCatalogo").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCatalogo").classList.add('active');
+      mostrarProductos()
