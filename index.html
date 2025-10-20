@@ -3,283 +3,309 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MisSup - Catálogo y Acceso</title>
+  <title>Mi Catálogo - Panel</title>
   <style>
-    /* Estilos combinados de login, registro y panel */
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: linear-gradient(to right, #004080, #002147);
-      color: #222;
+    :root{
+      --sidebar-bg: #0a1f44;
+      --sidebar-accent: #1b4f91;
+      --sidebar-hover: #173b74;
     }
-
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      width: 350px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      text-align: center;
-      margin: 60px auto;
-    }
-
-    .store-name {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #002147;
-      margin-bottom: 10px;
-    }
-
-    h2 {
-      color: #004080;
-      margin-bottom: 20px;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="email"],
-    select {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 12px;
-    }
-
-    input[type="submit"],
-    button.toggle {
-      background: #004080;
-      color: #fff;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button.toggle {
-      background: #002147;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    /* Panel oculto hasta que el usuario inicia sesión */
-    #panelContainer {
-      display: none;
-    }
-
-    /* Estilos del catálogo (puedes copiar los tuyos aquí si quieres más detalle) */
-    .main-content {
-      padding: 28px;
-      background: #fafafa;
-    }
-
-    .product-card {
-      background: white;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 6px 16px rgba(22,40,80,0.06);
-      margin-bottom: 20px;
-    }
-
-    .product-card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-
-    .product-card .name {
-      font-weight: bold;
-      font-size: 16px;
-      margin-top: 8px;
-    }
-
-    .product-card .price {
-      color: #004080;
-      font-weight: bold;
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;background:#fafafa;color:#222;}
+    .sidebar{position:fixed;top:0;left:0;height:100vh;width:240px;background-color:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:22px 14px;box-shadow:3px 0 10px rgba(0,0,0,0.15);z-index:1000;}
+    .sidebar .brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .sidebar .brand .logo{height:40px;width:40px;border-radius:8px;background:linear-gradient(135deg,#1763c7,#2aa0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+    .sidebar h2{margin:0;font-size:18px;color:#ecf3ff;}
+    .sidebar ul{list-style:none;padding:12px 0 0 0;margin:0;}
+    .sidebar ul li{margin:10px 0;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.18s,transform 0.12s;display:flex;align-items:center;gap:10px;color:#e6eefc;font-size:14px;}
+    .sidebar ul li:hover{background-color:var(--sidebar-hover);transform:translateX(4px);}
+    .sidebar .bottom{margin-top:16px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);}
+    #addProductBtn{background-color:var(--sidebar-accent);border:none;color:white;padding:12px;font-size:15px;border-radius:10px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 10px rgba(11,35,80,0.25);transition:transform .12s,background .12s;}
+    #addProductBtn[disabled],#addProductBtn.disabled{opacity:0.55;transform:none!important;cursor:not-allowed;pointer-events:none;box-shadow:none;}
+    #addProductBtn:hover{transform:translateY(-2px);background-color:#2166c1;}
+    .main-content{margin-left:260px;padding:28px;min-height:100vh;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+    .page-header h1{margin:0;font-size:26px;color:#0a2340;}
+    .user-area{display:flex;gap:8px;align-items:center;font-size:14px;color:#334e7a;}
+    .user-area button{background:#1b4f91;color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;}
+    .user-badge{background:#eef6ff;color:#0a2340;padding:6px 10px;border-radius:8px;font-weight:600;}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:18px;}
+    .product-card{background:white;border-radius:10px;padding:10px;box-shadow:0 6px 16px rgba(22,40,80,0.06);display:flex;flex-direction:column;gap:8px;min-height:200px;position:relative;}
+    .product-card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#f0f0f0;}
+    .product-card .info{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    .product-card .name{font-weight:600;font-size:15px;color:#0a2340;}
+    .product-card .price{font-weight:700;color:#1b4f91;}
+    .product-card .desc{font-size:13px;color:#556;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
+    .edit-btn{position:absolute;top:8px;right:8px;background:#1b4f91;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;display:none;}
+    .product-card:hover .edit-btn{display:block;}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1500;display:none;align-items:center;justify-content:center;padding:20px;}
+    .form-container{background:#fff;border-radius:12px;padding:18px;width:360px;max-width:100%;box-shadow:0 10px 30px rgba(14,30,60,0.18);display:flex;flex-direction:column;gap:8px;}
+    .form-container h3{margin:0 0 6px 0;color:var(--sidebar-bg);}
+    .form-row{display:flex;gap:8px;}
+    .form-row input[type="text"],.form-row input[type="number"],.form-container textarea{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #ddd;font-size:14px;}
+    .form-actions{display:flex;gap:8px;margin-top:6px;}
+    .btn-primary{flex:1;background:var(--sidebar-bg);color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;}
+    .btn-cancel{flex:1;background:#eee;color:#222;border:none;padding:10px;border-radius:8px;cursor:pointer;}
   </style>
 </head>
 <body>
-<div class="container" id="authContainer">
-  <div class="store-name">MisSup</div>
-  <h2 id="form-title">Iniciar sesión</h2>
 
-  <form id="login-form">
-    <input type="text" name="usuario" placeholder="Usuario" required>
-    <input type="password" name="clave" placeholder="Contraseña" required>
-    <select name="tipo" required>
-      <option value="" disabled selected>Selecciona tipo de usuario</option>
-      <option value="usuario">Usuario normal</option>
-      <option value="admin">Administrador</option>
-    </select>
-    <div class="actions">
-      <input type="submit" value="Entrar">
-      <button type="button" class="toggle" id="show-register">Registro</button>
+  <aside class="sidebar">
+    <div>
+      <div class="brand">
+        <div class="logo">MC</div>
+        <div>
+          <h2>Mi Catálogo</h2>
+          <div style="font-size:12px;color:rgba(255,255,255,0.75)">Panel administrador</div>
+        </div>
+      </div>
+      <ul>
+        <li onclick="filtrarCategoria('all')">🏠 Inicio</li>
+        <li onclick="filtrarCategoria('ropa')">👕 Ropa</li>
+        <li onclick="filtrarCategoria('electronicos')">💻 Electrónicos</li>
+        <li onclick="filtrarCategoria('hogar')">🏠 Hogar</li>
+        <li onclick="filtrarCategoria('cocina')">🍽 Cocina</li>
+        <li onclick="filtrarCategoria('entretenimiento')">🎮 Entretenimiento</li>
+      </ul>
     </div>
-  </form>
+    <div class="bottom">
+      <button id="addProductBtn" disabled>➕ Agregar producto</button>
+    </div>
+  </aside>
 
-  <form id="register-form" class="hidden">
-    <input type="text" name="nombre" placeholder="Nombre completo" required>
-    <input type="email" name="email" id="reg-email" placeholder="Correo electrónico" required>
-    <input type="text" name="usuario_reg" placeholder="Usuario" required>
-    <input type="password" name="clave_reg" placeholder="Contraseña" required>
-    <select name="role" id="reg-role" required>
-      <option value="usuario" selected>Usuario normal</option>
-      <option value="admin">Administrador</option>
-    </select>
-    <div class="actions">
-      <input type="submit" value="Registrar">
-      <button type="button" class="toggle" id="show-login">Volver</button>
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Catálogo público</h1>
+        <p>Ver y administrar productos</p>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="totalProducts" style="font-weight:600;color:#334e7a">0 productos</div>
+        <div class="user-area" id="userArea">
+          <button id="loginBtn">Iniciar sesión</button>
+        </div>
+      </div>
     </div>
-  </form>
-</div>
-<div id="panelContainer">
-  <div class="main-content">
-    <h1>Catálogo de productos</h1>
-    <div id="userInfo"></div>
-    <div id="productsGrid"></div>
+
+    <section class="products-grid" id="productsGrid"></section>
+  </main>
+
+  <div class="overlay" id="overlay">
+    <form class="form-container" id="formContainer" onsubmit="return false">
+      <h3 id="formTitle">Agregar nuevo producto</h3>
+      <input type="text" id="nombre" placeholder="Nombre del producto" required />
+      <div class="form-row">
+        <input type="number" id="precio" placeholder="Precio" min="0" step="0.01" required />
+        <input type="text" id="categoria" placeholder="Categoría (ej: ropa)" required />
+      </div>
+      <input type="text" id="imagen" placeholder="URL de imagen (opcional)" />
+      <textarea id="descripcion" rows="3" placeholder="Descripción (opcional)"></textarea>
+      <div class="form-actions">
+        <button class="btn-primary" id="guardarBtn">Guardar</button>
+        <button class="btn-cancel" id="cancelarBtn" type="button">Cancelar</button>
+      </div>
+    </form>
   </div>
-</div>
-<script>
-  const DOMAIN_ALLOWED = '@tecmilenio.mx';
-  const authContainer = document.getElementById('authContainer');
-  const panelContainer = document.getElementById('panelContainer');
-  const showRegisterBtn = document.getElementById('show-register');
-  const showLoginBtn = document.getElementById('show-login');
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-  const title = document.getElementById('form-title');
-  const regEmailInput = document.getElementById('reg-email');
-  const regRoleSelect = document.getElementById('reg-role');
-  const userInfo = document.getElementById('userInfo');
-  const productsGrid = document.getElementById('productsGrid');
 
-  let productos = [
-    {
-      nombre: "Laptop Gaming",
-      precio: "1200.00",
-      imagen: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=240&fit=crop"
-    },
-    {
-      nombre: "Camiseta Básica",
-      precio: "25.99",
-      imagen: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=240&fit=crop"
-    }
-  ];
+  <script>
+    const addProductBtn = document.getElementById('addProductBtn');
+    const overlay = document.getElementById('overlay');
+    const guardarBtn = document.getElementById('guardarBtn');
+    const cancelarBtn = document.getElementById('cancelarBtn');
+    const productsGrid = document.getElementById('productsGrid');
+    const totalProducts = document.getElementById('totalProducts');
+    const formTitle = document.getElementById('formTitle');
 
-  showRegisterBtn.addEventListener('click', () => {
-    loginForm.classList.add('hidden');
-    registerForm.classList.remove('hidden');
-    title.textContent = 'Registro';
-    validateEmailForAdmin();
-  });
+    const loginBtn = document.getElementById('loginBtn');
+    const userArea = document.getElementById('userArea');
 
-  showLoginBtn.addEventListener('click', () => {
-    registerForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-    title.textContent = 'Iniciar sesión';
-  });
+    let productos = JSON.parse(localStorage.getItem('productos')) || [];
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let editandoId = null;
 
-  function validateEmailForAdmin() {
-    const email = regEmailInput.value.trim().toLowerCase();
-    const adminOption = regRoleSelect.querySelector('option[value="admin"]');
-    if (!email.endsWith(DOMAIN_ALLOWED)) {
-      adminOption.disabled = true;
-      if (regRoleSelect.value === 'admin') regRoleSelect.value = 'usuario';
-    } else {
-      adminOption.disabled = false;
-    }
-  }
-
-  regEmailInput.addEventListener('input', validateEmailForAdmin);
-
-  loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const formData = new FormData(loginForm);
-    fetch('/login', {
-      method: 'POST',
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.mensaje || data.error);
-      if (data.user) {
-        localStorage.setItem('currentUser', JSON.stringify({ usuario: data.user, rol: data.mensaje.includes('admin') ? 'admin' : 'usuario' }));
-        mostrarPanel();
-      }
-    })
-    .catch(() => alert('Error al conectar con el servidor'));
-  });
-
-  registerForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const email = regEmailInput.value.trim().toLowerCase();
-    const role = regRoleSelect.value;
-
-    if (role === 'admin' && !email.endsWith(DOMAIN_ALLOWED)) {
-      alert('Solo correos @tecmilenio.mx pueden registrarse como administradores.');
-      return;
+    // Datos de ejemplo si no hay productos
+    if (productos.length === 0) {
+      productos = [
+        {
+          id: 1,
+          nombre: "Laptop Gaming",
+          precio: "1200.00",
+          categoria: "electronicos",
+          imagen: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400&h=240&fit=crop",
+          descripcion: "Laptop potente para gaming y trabajo"
+        },
+        {
+          id: 2,
+          nombre: "Camiseta Básica",
+          precio: "25.99",
+          categoria: "ropa",
+          imagen: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=240&fit=crop",
+          descripcion: "Camiseta 100% algodón, varios colores"
+        }
+      ];
+      guardarEnLocalStorage();
     }
 
-    const formData = new FormData(registerForm);
-    fetch('/register', {
-      method: 'POST',
-      body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-      alert(data.mensaje || data.error);
-      if (data.mensaje) {
-                  registerForm.reset();
-        registerForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-        title.textContent = 'Iniciar sesión';
-      }
-    })
-    .catch(() => alert('Error al conectar con el servidor'));
-  });
-
-  function mostrarPanel() {
-    authContainer.style.display = 'none';
-    panelContainer.style.display = 'block';
-
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    userInfo.innerHTML = `<p><strong>Bienvenido:</strong> ${currentUser.usuario} (${currentUser.rol})</p>`;
+    updateAuthUI();
     renderProductos();
-  }
 
-  function renderProductos() {
-    productsGrid.innerHTML = '';
-    productos.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'product-card';
-      card.innerHTML = `
-        <img src="${p.imagen}" alt="${p.nombre}">
-        <div class="name">${p.nombre}</div>
-        <div class="price">$${p.precio}</div>
-      `;
-      productsGrid.appendChild(card);
+    addProductBtn.onclick = () => openForm();
+
+    guardarBtn.onclick = () => {
+      const nombre = document.getElementById('nombre').value.trim();
+      const precio = document.getElementById('precio').value;
+      const categoria = document.getElementById('categoria').value.trim().toLowerCase() || 'general';
+      const imagen = document.getElementById('imagen').value.trim() || 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=240&fit=crop&text=Sin+imagen';
+      const descripcion = document.getElementById('descripcion').value.trim();
+
+      if (!nombre || !precio) return alert("Completa los campos obligatorios.");
+
+      if (editandoId) {
+        const prod = productos.find(p => p.id === editandoId);
+        if (prod) {
+          prod.nombre = nombre;
+          prod.precio = parseFloat(precio).toFixed(2);
+          prod.categoria = categoria;
+          prod.imagen = imagen;
+          prod.descripcion = descripcion;
+        }
+        editandoId = null;
+        formTitle.textContent = "Agregar nuevo producto";
+      } else {
+        productos.push({
+          id: Date.now(),
+          nombre,
+          precio: parseFloat(precio).toFixed(2),
+          categoria,
+          imagen,
+          descripcion
+        });
+      }
+      
+      guardarEnLocalStorage();
+      renderProductos();
+      closeForm();
+    };
+
+    cancelarBtn.onclick = closeForm;
+
+    function openForm(prod = null) {
+      if (!currentUser || currentUser.role !== "admin") {
+        alert("Solo los administradores pueden agregar o editar productos.");
+        return;
+      }
+      overlay.style.display = "flex";
+      if (prod) {
+        editandoId = prod.id;
+        formTitle.textContent = "Editar producto";
+        document.getElementById('nombre').value = prod.nombre;
+        document.getElementById('precio').value = prod.precio;
+        document.getElementById('categoria').value = prod.categoria;
+        document.getElementById('imagen').value = prod.imagen;
+        document.getElementById('descripcion').value = prod.descripcion;
+      } else {
+        formTitle.textContent = "Agregar nuevo producto";
+        document.getElementById('formContainer').reset();
+      }
+    }
+
+    function closeForm() {
+      overlay.style.display = "none";
+      editandoId = null;
+    }
+
+    function renderProductos(list = productos) {
+      productsGrid.innerHTML = '';
+      if (list.length === 0) {
+        totalProducts.textContent = "0 productos";
+        productsGrid.innerHTML = "<p style='color:#666;grid-column:1/-1;text-align:center;padding:40px;'>No hay productos en esta categoría.</p>";
+        return;
+      }
+      list.forEach(p => {
+        const card = document.createElement('div');
+        card.className = "product-card";
+        card.innerHTML = `
+          <img src="${p.imagen}" alt="${p.nombre}" onerror="this.src='https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=240&fit=crop&text=Error+imagen'">
+          <div class="info">
+            <div class="name">${p.nombre}</div>
+            <div class="price">$${p.precio}</div>
+          </div>
+          <div class="desc">${p.descripcion}</div>
+          ${currentUser?.role === "admin" ? <button class='edit-btn'>✏️ Editar</button> : ''}
+        `;
+        if (currentUser?.role === "admin") {
+          card.querySelector('.edit-btn').onclick = () => openForm(p);
+        }
+        productsGrid.appendChild(card);
+      });
+      totalProducts.textContent = ${list.length} producto${list.length > 1 ? 's' : ''};
+    }
+
+    function updateAuthUI() {
+      if (currentUser?.role === "admin") {
+        addProductBtn.disabled = false;
+        addProductBtn.classList.remove('disabled');
+      } else {
+        addProductBtn.disabled = true;
+        addProductBtn.classList.add('disabled');
+      }
+
+      if (!currentUser) {
+        userArea.innerHTML = '<button id="loginBtn">Iniciar sesión</button>';
+        document.getElementById('loginBtn').onclick = mostrarLogin;
+      } else {
+        userArea.innerHTML = `
+          <div class="user-badge">${currentUser.name} (${currentUser.role})</div>
+          <button id="logoutBtn">Cerrar sesión</button>
+        `;
+        document.getElementById('logoutBtn').onclick = () => {
+          currentUser = null;
+          localStorage.removeItem('currentUser');
+          updateAuthUI();
+          renderProductos();
+        };
+      }
+    }
+
+    function filtrarCategoria(cat){
+      if (cat === "all") return renderProductos();
+      const filtered = productos.filter(p => p.categoria === cat);
+      renderProductos(filtered);
+    }
+
+    function guardarEnLocalStorage() {
+      localStorage.setItem('productos', JSON.stringify(productos));
+    }
+
+    // Sistema de login integrado
+    function mostrarLogin() {
+      const usuario = prompt("Usuario (admin/user):");
+      if (!usuario) return;
+      
+      const contraseña = prompt("Contraseña:");
+      
+      // Credenciales predefinidas
+      if (usuario === "admin" && contraseña === "admin123") {
+        currentUser = { name: "Administrador", role: "admin" };
+      } else if (usuario === "user" && contraseña === "user123") {
+        currentUser = { name: "Usuario", role: "user" };
+      } else {
+        alert("❌ Credenciales incorrectas\n\nPrueba:\nUsuario: admin / Contraseña: admin123\nUsuario: user / Contraseña: user123");
+        return;
+      }
+      
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      updateAuthUI();
+      renderProductos();
+      alert(✅ Bienvenido ${currentUser.name});
+    }
+
+    // Manejar clic en login
+    document.addEventListener('click', function(e) {
+      if (e.target.id === 'loginBtn') {
+        mostrarLogin();
+      }
     });
-  }
-
-  // Mostrar panel si ya hay sesión guardada
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (currentUser) {
-    mostrarPanel();
-  }
-</script>
+  </script>
 </body>
 </html>
-
-
