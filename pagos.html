@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pagos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .payment-method {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+        
+        .payment-method.selected {
+            border-color: #27ae60;
+            background-color: #f8fff9;
+        }
+        
+        .payment-method input {
+            width: auto;
+            margin-bottom: 10px;
+        }
+        
+        .method-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(39, 174, 96, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .pending {
+            background: #fff3cd;
+            border: 2px solid #ffeaa7;
+            color: #856404;
+        }
+        
+        .history-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #ecf0f1;
+        }
+        
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .transaction-completed {
+            border-left-color: #27ae60;
+        }
+        
+        .transaction-failed {
+            border-left-color: #e74c3c;
+        }
+        
+        .transaction-pending {
+            border-left-color: #f39c12;
+        }
+        
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Sistema de Pagos</h1>
+            <p>Paga de forma segura y rápida</p>
+        </div>
+        
+        <div class="content">
+            <!-- Formulario de Pago -->
+            <form id="form-pago">
+                <div class="form-group">
+                    <label for="usuario_id">🔑 ID de Usuario</label>
+                    <input type="number" id="usuario_id" name="usuario_id" placeholder="Ingresa tu ID de usuario" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="monto">💰 Monto a Pagar</label>
+                    <input type="number" id="monto" name="monto" placeholder="0.00" step="0.01" min="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descripcion">📝 Descripción del Pago</label>
+                    <textarea id="descripcion" name="descripcion" placeholder="Describe el motivo del pago..." rows="3" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>💎 Método de Pago</label>
+                    <div class="payment-methods" id="metodos-pago">
+                        <!-- Los métodos se cargan dinámicamente -->
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn">
+                    🚀 Pagar Ahora
+                </button>
+            </form>
+            
+            <!-- Resultado del Pago -->
+            <div id="resultado-pago" class="result"></div>
+            
+            <!-- Historial de Pagos -->
+            <div class="history-section">
+                <h3>📊 Historial de Pagos</h3>
+                <button onclick="cargarHistorial()" class="btn btn-secondary" style="width: auto; margin: 15px 0;">
+                    🔄 Ver Mi Historial
+                </button>
+                <div id="lista-historial"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let metodosPago = [];
+        
+        // Cargar métodos de pago al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarMetodosPago();
+        });
+        
+        function cargarMetodosPago() {
+            fetch('/api/pagos/metodos')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        metodosPago = data.data;
+                        mostrarMetodosPago(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+        
+        function mostrarMetodosPago(metodos) {
+            const container = document.getElementById('metodos-pago');
+            let html = '';
+            
+            metodos.forEach(metodo => {
+                const icon = getMethodIcon(metodo.tipo);
+                html += `
+                    <div class="payment-method" onclick="seleccionarMetodo(${metodo.id})">
+                        <input type="radio" name="metodo_pago_id" value="${metodo.id}" required>
+                        <div class="method-icon">${icon}</div>
+                        <strong>${metodo.nombre}</strong>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function getMethodIcon(tipo) {
+            const icons = {
+                'tarjeta': '💳',
+                'paypal': '🔵',
+                'transferencia': '🏦',
+                'efectivo': '💰'
+            };
+            return icons[tipo] || '💳';
+        }
+        
+        function seleccionarMetodo(metodoId) {
+            // Remover selección anterior
+            document.querySelectorAll('.payment-method').forEach(method => {
+                method.classList.remove('selected');
+            });
+            
+            // Agregar selección actual
+            const selectedMethod = document.querySelector(`input[value="${metodoId}"]`).parentNode;
+            selectedMethod.classList.add('selected');
+            document.querySelector(`input[value="${metodoId}"]`).checked = true;
+        }
+        
+        // Procesar pago
+        document.getElementById('form-pago').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Mostrar estado de procesamiento
+            const resultado = document.getElementById('resultado-pago');
+            resultado.style.display = 'block';
+            resultado.className = 'result pending';
+            resultado.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 3em; margin-bottom: 10px;">⏳</div>
+                    <h3>Procesando tu pago...</h3>
+                    <p>Por favor espera, esto puede tomar unos segundos.</p>
+                </div>
+            `;
+            
+            fetch('/api/pagos/procesar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    resultado.className = 'result success';
+                    const metodo = metodosPago.find(m => m.id == data.metodo_pago_id);
+                    resultado.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 3em; margin-bottom: 10px;">✅</div>
+                            <h3>¡Pago ${result.data.estado.toUpperCase()}!</h3>
+                            <p><strong>ID Transacción:</strong> ${result.data.transaccion_id}</p>
+                            <p><strong>Método:</strong> ${result.data.metodo}</p>
+                            <p><strong>Monto:</strong> $${parseFloat(result.data.monto).toFixed(2)}</p>
+                            <p><strong>Estado:</strong> <span class="status-badge status-completed">${result.data.estado}</span></p>
+                            <p><strong>Mensaje:</strong> ${result.data.mensaje}</p>
+                        </div>
+                    `;
+                } else {
+                    resultado.className = 'result error';
+                    resultado.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 3em; margin-bottom: 10px;">❌</div>
+                            <h3>Error en el pago</h3>
+                            <p>${result.data}</p>
+                        </div>
+                    `;
+                }
+                
+                // Mostrar sección de historial
+                document.querySelector('.history-section').style.display = 'block';
+            })
+            .catch(error => {
+                resultado.className = 'result error';
+                resultado.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="font-size: 3em; margin-bottom: 10px;">❌</div>
+                        <h3>Error de conexión</h3>
+                        <p>No se pudo conectar con el servidor.</p>
+                    </div>
+                `;
+            });
+        });
+        
+        function cargarHistorial() {
+            const usuarioId = document.getElementById('usuario_id').value;
+            if (!usuarioId) {
+                alert('Por favor ingresa tu ID de usuario primero');
+                return;
+            }
+            
+            const lista = document.getElementById('lista-historial');
+            lista.innerHTML = '<p>Cargando historial...</p>';
+            
+            fetch(`/api/pagos/historial?usuario_id=${usuarioId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (data.data.length === 0) {
+                            lista.innerHTML = '<p>No hay transacciones registradas.</p>';
+                            return;
+                        }
+                        
+                        let html = '';
+                        data.data.forEach(transaccion => {
+                            const statusClass = `status-${transaccion.estado}`;
+                            const transactionClass = `transaction-${transaccion.estado}`;
+                            
+                            html += `
+                                <div class="transaction-item ${transactionClass}">
+                                    <div>
+                                        <strong>#${transaccion.id}</strong>
+                                        <p>${transaccion.descripcion}</p>
+                                        <small>${new Date(transaccion.fecha_creacion).toLocaleDateString()}</small>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1.2em; font-weight: bold;">$${transaccion.monto.toFixed(2)}</div>
+                                        <div>${transaccion.metodo_nombre}</div>
+                                        <span class="status-badge ${statusClass}">${transaccion.estado}</span>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        lista.innerHTML = html;
+                    } else {
+                        lista.innerHTML = `<p style="color: red;">Error: ${data.data}</p>`;
+                    }
+                })
+                .catch(error => {
+                    lista.innerHTML = '<p style="color: red;">Error al cargar el historial</p>';
+                });
+        }
+    </script>
+</body>
+</html>
