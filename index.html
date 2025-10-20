@@ -5,325 +5,52 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Mi Catálogo - Panel</title>
   <style>
-    /* ====== BARRA LATERAL ====== */
     :root{
       --sidebar-bg: #0a1f44;
       --sidebar-accent: #1b4f91;
       --sidebar-hover: #173b74;
     }
-
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: #fafafa;
-      color: #222;
-    }
-
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 240px;
-      background-color: var(--sidebar-bg);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 22px 14px;
-      box-shadow: 3px 0 10px rgba(0,0,0,0.15);
-      z-index: 1000;
-    }
-
-    .sidebar .brand {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 10px;
-    }
-
-    .sidebar .brand .logo {
-      height:40px;
-      width:40px;
-      border-radius:8px;
-      background: linear-gradient(135deg,#1763c7,#2aa0ff);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:700;
-      color:white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
-    .sidebar h2 {
-      margin:0;
-      font-size:18px;
-      color:#ecf3ff;
-    }
-
-    .sidebar ul {
-      list-style: none;
-      padding: 12px 0 0 0;
-      margin: 0;
-    }
-
-    .sidebar ul li {
-      margin: 10px 0;
-      padding: 10px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.18s, transform 0.12s;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      color: #e6eefc;
-      font-size:14px;
-    }
-
-    .sidebar ul li:hover {
-      background-color: var(--sidebar-hover);
-      transform: translateX(4px);
-    }
-
-    /* Botón en el fondo, bien acomodado */
-    .sidebar .bottom {
-      margin-top: 16px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    #addProductBtn {
-      background-color: var(--sidebar-accent);
-      border: none;
-      color: white;
-      padding: 12px;
-      font-size: 15px;
-      border-radius: 10px;
-      cursor: pointer;
-      width: 100%;
-      display: flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      box-shadow: 0 4px 10px rgba(11,35,80,0.25);
-      transition: transform .12s, background .12s;
-    }
-
-    /* estado cuando no autorizado */
-    #addProductBtn[disabled], #addProductBtn.disabled {
-      opacity: 0.55;
-      transform: none !important;
-      cursor: not-allowed;
-      pointer-events: none;
-      box-shadow: none;
-    }
-
-    #addProductBtn:hover {
-      transform: translateY(-2px);
-      background-color: #2166c1;
-    }
-
-    /* ====== CONTENIDO PRINCIPAL ====== */
-    .main-content {
-      margin-left: 260px; /* espacio para la barra */
-      padding: 28px;
-      min-height: 100vh;
-    }
-
-    .page-header {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom: 18px;
-    }
-
-    .page-header .title {
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-
-    .page-header h1{
-      margin:0;
-      font-size:26px;
-      color: #0a2340;
-    }
-    .page-header p{
-      margin:0;
-      color: #586374;
-      font-size:14px;
-    }
-
-    /* area de usuario (nuevo) */
-    .user-area {
-      display:flex;
-      gap:8px;
-      align-items:center;
-      font-size:14px;
-      color:#334e7a;
-    }
-
-    .user-area button {
-      background:#1b4f91;
-      color:white;
-      border:none;
-      padding:8px 10px;
-      border-radius:8px;
-      cursor:pointer;
-    }
-
-    .user-badge {
-      background:#eef6ff;
-      color:#0a2340;
-      padding:6px 10px;
-      border-radius:8px;
-      font-weight:600;
-    }
-
-    /* Productos - Grid */
-    .products-grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
-      gap:16px;
-      margin-top:18px;
-    }
-
-    .product-card{
-      background:white;
-      border-radius:10px;
-      padding:10px;
-      box-shadow: 0 6px 16px rgba(22,40,80,0.06);
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      min-height: 180px;
-    }
-
-    .product-card img{
-      width:100%;
-      height:120px;
-      object-fit:cover;
-      border-radius:8px;
-      background:#f0f0f0;
-    }
-
-    .product-card .info{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-    }
-
-    .product-card .info .name{
-      font-weight:600;
-      font-size:15px;
-      color:#0a2340;
-    }
-
-    .product-card .info .price{
-      font-weight:700;
-      color:#1b4f91;
-    }
-
-    .product-card .desc{
-      font-size:13px;
-      color:#556;
-      line-height:1.2;
-      overflow:hidden;
-      display:-webkit-box;
-      -webkit-box-orient:vertical;
-      -webkit-line-clamp:2;
-    }
-
-    /* ====== FORMULARIO FLOTANTE ====== */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.45);
-      z-index: 1500;
-      display: none;
-      align-items:center;
-      justify-content:center;
-      padding: 20px;
-    }
-
-    .form-container {
-      background: #fff;
-      border-radius: 12px;
-      padding: 18px;
-      width: 360px;
-      max-width: 100%;
-      box-shadow: 0 10px 30px rgba(14,30,60,0.18);
-      z-index: 1600;
-      display: flex;
-      flex-direction: column;
-      gap:8px;
-    }
-
-    .form-container h3{
-      margin:0 0 6px 0;
-      color: var(--sidebar-bg);
-    }
-
-    .form-row{
-      display:flex;
-      gap:8px;
-    }
-
-    .form-row input[type="text"],
-    .form-row input[type="number"],
-    .form-container textarea{
-      width:100%;
-      padding:8px 10px;
-      border-radius:8px;
-      border:1px solid #ddd;
-      font-size:14px;
-    }
-
-    .form-actions{
-      display:flex;
-      gap:8px;
-      margin-top:6px;
-    }
-
-    .btn-primary{
-      flex:1;
-      background: var(--sidebar-bg);
-      color:white;
-      border:none;
-      padding:10px;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:600;
-    }
-
-    .btn-cancel{
-      flex:1;
-      background:#eee;
-      color:#222;
-      border:none;
-      padding:10px;
-      border-radius:8px;
-      cursor:pointer;
-    }
-
-    /* Login overlay específico */
-    .login-form .form-row { flex-direction: column; gap:6px; }
-    .login-form select, .login-form input { padding:8px; border-radius:6px; border:1px solid #ddd; }
-
-    /* Responsive pequeño */
-    @media (max-width:720px){
-      .sidebar{ width:200px; }
-      .main-content{ margin-left:220px; padding:16px; }
-    }
+    body{margin:0;font-family:"Segoe UI",Roboto,Arial,sans-serif;background:#fafafa;color:#222;}
+    .sidebar{position:fixed;top:0;left:0;height:100vh;width:240px;background-color:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:22px 14px;box-shadow:3px 0 10px rgba(0,0,0,0.15);z-index:1000;}
+    .sidebar .brand{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    .sidebar .brand .logo{height:40px;width:40px;border-radius:8px;background:linear-gradient(135deg,#1763c7,#2aa0ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:white;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+    .sidebar h2{margin:0;font-size:18px;color:#ecf3ff;}
+    .sidebar ul{list-style:none;padding:12px 0 0 0;margin:0;}
+    .sidebar ul li{margin:10px 0;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.18s,transform 0.12s;display:flex;align-items:center;gap:10px;color:#e6eefc;font-size:14px;}
+    .sidebar ul li:hover{background-color:var(--sidebar-hover);transform:translateX(4px);}
+    .sidebar .bottom{margin-top:16px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);}
+    #addProductBtn{background-color:var(--sidebar-accent);border:none;color:white;padding:12px;font-size:15px;border-radius:10px;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 10px rgba(11,35,80,0.25);transition:transform .12s,background .12s;}
+    #addProductBtn[disabled],#addProductBtn.disabled{opacity:0.55;transform:none!important;cursor:not-allowed;pointer-events:none;box-shadow:none;}
+    #addProductBtn:hover{transform:translateY(-2px);background-color:#2166c1;}
+    .main-content{margin-left:260px;padding:28px;min-height:100vh;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+    .page-header h1{margin:0;font-size:26px;color:#0a2340;}
+    .user-area{display:flex;gap:8px;align-items:center;font-size:14px;color:#334e7a;}
+    .user-area button{background:#1b4f91;color:white;border:none;padding:8px 10px;border-radius:8px;cursor:pointer;}
+    .user-badge{background:#eef6ff;color:#0a2340;padding:6px 10px;border-radius:8px;font-weight:600;}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:18px;}
+    .product-card{background:white;border-radius:10px;padding:10px;box-shadow:0 6px 16px rgba(22,40,80,0.06);display:flex;flex-direction:column;gap:8px;min-height:200px;position:relative;}
+    .product-card img{width:100%;height:120px;object-fit:cover;border-radius:8px;background:#f0f0f0;}
+    .product-card .info{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    .product-card .name{font-weight:600;font-size:15px;color:#0a2340;}
+    .product-card .price{font-weight:700;color:#1b4f91;}
+    .product-card .desc{font-size:13px;color:#556;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;}
+    .edit-btn{position:absolute;top:8px;right:8px;background:#1b4f91;color:white;border:none;border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;display:none;}
+    .product-card:hover .edit-btn{display:block;}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1500;display:none;align-items:center;justify-content:center;padding:20px;}
+    .form-container{background:#fff;border-radius:12px;padding:18px;width:360px;max-width:100%;box-shadow:0 10px 30px rgba(14,30,60,0.18);display:flex;flex-direction:column;gap:8px;}
+    .form-container h3{margin:0 0 6px 0;color:var(--sidebar-bg);}
+    .form-row{display:flex;gap:8px;}
+    .form-row input[type="text"],.form-row input[type="number"],.form-container textarea{width:100%;padding:8px 10px;border-radius:8px;border:1px solid #ddd;font-size:14px;}
+    .form-actions{display:flex;gap:8px;margin-top:6px;}
+    .btn-primary{flex:1;background:var(--sidebar-bg);color:white;border:none;padding:10px;border-radius:8px;cursor:pointer;font-weight:600;}
+    .btn-cancel{flex:1;background:#eee;color:#222;border:none;padding:10px;border-radius:8px;cursor:pointer;}
   </style>
 </head>
 <body>
 
-  <!-- BARRA LATERAL -->
-  <aside class="sidebar" aria-label="barra lateral">
+  <aside class="sidebar">
     <div>
       <div class="brand">
         <div class="logo">MC</div>
@@ -332,7 +59,6 @@
           <div style="font-size:12px;color:rgba(255,255,255,0.75)">Panel administrador</div>
         </div>
       </div>
-
       <ul>
         <li onclick="filtrarCategoria('all')">🏠 Inicio</li>
         <li onclick="filtrarCategoria('ropa')">👕 Ropa</li>
@@ -342,42 +68,31 @@
         <li onclick="filtrarCategoria('entretenimiento')">🎮 Entretenimiento</li>
       </ul>
     </div>
-
     <div class="bottom">
-      <button id="addProductBtn" title="Agregar producto" disabled>➕ Agregar producto</button>
+      <button id="addProductBtn" disabled>➕ Agregar producto</button>
     </div>
   </aside>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
     <div class="page-header">
-      <div class="title">
+      <div>
         <h1>Catálogo público</h1>
-        <div style="font-size:13px;color:#6b7888">Ver y administrar productos</div>
+        <p>Ver y administrar productos</p>
       </div>
-
       <div style="display:flex;gap:12px;align-items:center">
         <div id="totalProducts" style="font-weight:600;color:#334e7a">0 productos</div>
-
-        <!-- area de usuario / login -->
         <div class="user-area" id="userArea">
           <button id="loginBtn">Iniciar sesión</button>
         </div>
       </div>
     </div>
 
-    <p style="color:#556"></p>
-
-    <section class="products-grid" id="productsGrid">
-      <!-- Product cards se inyectan aquí -->
-    </section>
+    <section class="products-grid" id="productsGrid"></section>
   </main>
 
-  <!-- OVERLAY + FORMULARIO (agregar producto) -->
-  <div class="overlay" id="overlay" aria-hidden="true">
+  <div class="overlay" id="overlay">
     <form class="form-container" id="formContainer" onsubmit="return false">
-      <h3>Agregar nuevo producto</h3>
-
+      <h3 id="formTitle">Agregar nuevo producto</h3>
       <input type="text" id="nombre" placeholder="Nombre del producto" required />
       <div class="form-row">
         <input type="number" id="precio" placeholder="Precio" min="0" step="0.01" required />
@@ -385,7 +100,6 @@
       </div>
       <input type="text" id="imagen" placeholder="URL de imagen (opcional)" />
       <textarea id="descripcion" rows="3" placeholder="Descripción (opcional)"></textarea>
-
       <div class="form-actions">
         <button class="btn-primary" id="guardarBtn">Guardar</button>
         <button class="btn-cancel" id="cancelarBtn" type="button">Cancelar</button>
@@ -393,246 +107,143 @@
     </form>
   </div>
 
-  <!-- LOGIN OVERLAY (se puede seguir usando para demo local) -->
-  <div class="overlay" id="loginOverlay" aria-hidden="true" style="z-index:1700;">
-    <form class="form-container login-form" id="loginForm" onsubmit="return false">
-      <h3>Iniciar sesión (demo)</h3>
-
-      <div class="form-row">
-        <input id="loginName" type="text" placeholder="Nombre de usuario" required />
-        <select id="loginRole" aria-label="Rol">
-          <option value="user">Usuario</option>
-          <option value="admin">Administrador</option>
-        </select>
-      </div>
-
-      <div class="form-actions">
-        <button class="btn-primary" id="loginSubmit">Entrar</button>
-        <button class="btn-cancel" id="loginCancel" type="button">Cancelar</button>
-      </div>
-
-      <div style="font-size:12px;color:#666;margin-top:8px">
-        Nota: esta autenticación es local y de demostración. Para producción usa un backend seguro.
-      </div>
-    </form>
-  </div>
-
-  <!-- SCRIPT -->
   <script>
-    // Referencias
     const addProductBtn = document.getElementById('addProductBtn');
     const overlay = document.getElementById('overlay');
-    const formContainer = document.getElementById('formContainer');
-    const cancelarBtn = document.getElementById('cancelarBtn');
     const guardarBtn = document.getElementById('guardarBtn');
+    const cancelarBtn = document.getElementById('cancelarBtn');
     const productsGrid = document.getElementById('productsGrid');
     const totalProducts = document.getElementById('totalProducts');
+    const formTitle = document.getElementById('formTitle');
 
-    // Auth refs
     const loginBtn = document.getElementById('loginBtn');
     const userArea = document.getElementById('userArea');
-    const loginOverlay = document.getElementById('loginOverlay');
-    const loginForm = document.getElementById('loginForm');
-    const loginSubmit = document.getElementById('loginSubmit');
-    const loginCancel = document.getElementById('loginCancel');
-    const loginName = document.getElementById('loginName');
-    const loginRole = document.getElementById('loginRole');
 
-    let productos = []; // arreglo en memoria (temporal)
-    let currentUser = null; // { name, role } or null
+    let productos = [];
+    let currentUser = JSON.parse(localStorage.getItem('currentUser') || "null");
+    let editandoId = null;
 
-    // Cargar sesión desde localStorage si existe
-    (function loadSession(){
-      try {
-        const saved = localStorage.getItem('currentUser');
-        if (saved) currentUser = JSON.parse(saved);
-      } catch (e) { currentUser = null; }
-    })();
-
-    // Estado inicial: actualizar UI según sesión
     updateAuthUI();
 
-    // Abrir formulario (solo admin)
-    addProductBtn.addEventListener('click', () => {
-      if (!currentUser || currentUser.role !== 'admin') {
-        alert('Solo administradores pueden agregar productos. Inicia sesión como administrador.');
-        return;
-      }
-      openAddForm();
-    });
+    addProductBtn.onclick = () => openForm();
 
-    function openAddForm(){
-      overlay.style.display = 'flex';
-      overlay.setAttribute('aria-hidden', 'false');
-      setTimeout(()=> document.getElementById('nombre').focus(),80);
-    }
-
-    // Cerrar
-    function cerrarFormulario(){
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-      formContainer.reset?.();
-      document.getElementById('nombre').value = '';
-      document.getElementById('precio').value = '';
-      document.getElementById('imagen').value = '';
-      document.getElementById('descripcion').value = '';
-      document.getElementById('categoria').value = '';
-    }
-
-    cancelarBtn.addEventListener('click', cerrarFormulario);
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) cerrarFormulario();
-    });
-
-    // Guardar producto y agregar a grid (verifica rol)
-    guardarBtn.addEventListener('click', () => {
-      if (!currentUser || currentUser.role !== 'admin') {
-        alert('Acceso denegado. Debes ser administrador para guardar productos.');
-        cerrarFormulario();
-        return;
-      }
-
+    guardarBtn.onclick = () => {
       const nombre = document.getElementById('nombre').value.trim();
       const precio = document.getElementById('precio').value;
-      const imagen = document.getElementById('imagen').value.trim();
-      const descripcion = document.getElementById('descripcion').value.trim();
       const categoria = document.getElementById('categoria').value.trim() || 'general';
+      const imagen = document.getElementById('imagen').value.trim() || 'https://via.placeholder.com/400x240?text=Sin+imagen';
+      const descripcion = document.getElementById('descripcion').value.trim();
 
-      if (!nombre || !precio){
-        alert('Por favor completa los campos obligatorios: nombre y precio.');
+      if (!nombre || !precio) return alert("Completa los campos obligatorios.");
+
+      if (editandoId) {
+        const prod = productos.find(p => p.id === editandoId);
+        if (prod) {
+          prod.nombre = nombre;
+          prod.precio = parseFloat(precio).toFixed(2);
+          prod.categoria = categoria;
+          prod.imagen = imagen;
+          prod.descripcion = descripcion;
+        }
+        editandoId = null;
+        formTitle.textContent = "Agregar nuevo producto";
+      } else {
+        productos.push({
+          id: Date.now(),
+          nombre,
+          precio: parseFloat(precio).toFixed(2),
+          categoria,
+          imagen,
+          descripcion
+        });
+      }
+      renderProductos();
+      closeForm();
+    };
+
+    cancelarBtn.onclick = closeForm;
+
+    function openForm(prod = null) {
+      if (!currentUser || currentUser.role !== "admin") {
+        alert("Solo los administradores pueden agregar o editar productos.");
         return;
       }
+      overlay.style.display = "flex";
+      if (prod) {
+        editandoId = prod.id;
+        formTitle.textContent = "Editar producto";
+        document.getElementById('nombre').value = prod.nombre;
+        document.getElementById('precio').value = prod.precio;
+        document.getElementById('categoria').value = prod.categoria;
+        document.getElementById('imagen').value = prod.imagen;
+        document.getElementById('descripcion').value = prod.descripcion;
+      } else {
+        formTitle.textContent = "Agregar nuevo producto";
+        document.getElementById('formContainer').reset();
+      }
+    }
 
-      const producto = {
-        id: Date.now(),
-        nombre,
-        precio: parseFloat(precio).toFixed(2),
-        imagen: imagen || 'https://via.placeholder.com/400x240?text=Sin+imagen',
-        descripcion,
-        categoria: categoria.toLowerCase()
-      };
+    function closeForm() {
+      overlay.style.display = "none";
+      editandoId = null;
+    }
 
-      productos.unshift(producto); // agregar al inicio
-      renderProductos(productos);
-      cerrarFormulario();
-    });
-
-    // Renderizar tarjetas
-    function renderProductos(list){
+    function renderProductos(list = productos) {
       productsGrid.innerHTML = '';
-      if (!list || list.length === 0) {
-        productsGrid.innerHTML = '<div style="color:#6b7888">No hay productos todavía. Usa "Agregar producto" para crear uno.</div>';
-        totalProducts.innerText = '0 productos';
+      if (list.length === 0) {
+        totalProducts.textContent = "0 productos";
+        productsGrid.innerHTML = "<p style='color:#666'>No hay productos.</p>";
         return;
       }
-
       list.forEach(p => {
-        const card = document.createElement('article');
-        card.className = 'product-card';
-        card.setAttribute('data-categoria', p.categoria);
-
+        const card = document.createElement('div');
+        card.className = "product-card";
         card.innerHTML = `
-          <img src="${escapeHtml(p.imagen)}" alt="${escapeHtml(p.nombre)}">
+          <img src="${p.imagen}" alt="${p.nombre}">
           <div class="info">
-            <div class="name">${escapeHtml(p.nombre)}</div>
-            <div class="price">$${escapeHtml(p.precio)}</div>
+            <div class="name">${p.nombre}</div>
+            <div class="price">$${p.precio}</div>
           </div>
-          <div class="desc">${escapeHtml(p.descripcion || '')}</div>
+          <div class="desc">${p.descripcion}</div>
+          ${currentUser?.role === "admin" ? `<button class='edit-btn'>✏️ Editar</button>` : ''}
         `;
+        if (currentUser?.role === "admin") {
+          card.querySelector('.edit-btn').onclick = () => openForm(p);
+        }
         productsGrid.appendChild(card);
       });
-
-      totalProducts.innerText = `${list.length} producto${list.length === 1 ? '' : 's'}`;
+      totalProducts.textContent = `${list.length} producto${list.length > 1 ? 's' : ''}`;
     }
 
-    // Filtrar por categoria (click en sidebar)
-    function filtrarCategoria(cat){
-      if (cat === 'all') {
-        renderProductos(productos);
-        return;
-      }
-      const filtrados = productos.filter(p => p.categoria === cat);
-      renderProductos(filtrados.length ? filtrados : []);
-    }
-
-    // Escape simple para evitar inyecciones de HTML
-    function escapeHtml(str){
-      if (!str) return '';
-      return String(str)
-        .replaceAll('&','&amp;')
-        .replaceAll('<','&lt;')
-        .replaceAll('>','&gt;')
-        .replaceAll('"','&quot;')
-        .replaceAll("'",'&#39;');
-    }
-
-    // ---- Autenticación local (demo) ----
-    loginBtn?.addEventListener('click', () => {
-      // redirige a la página de login/registro
-      location.href = 'login.html';
-    });
-
-    loginCancel.addEventListener('click', () => {
-      loginOverlay.style.display = 'none';
-      loginOverlay.setAttribute('aria-hidden', 'true');
-      loginForm.reset?.();
-    });
-
-    loginOverlay.addEventListener('click', (e) => {
-      if (e.target === loginOverlay) {
-        loginOverlay.style.display = 'none';
-        loginOverlay.setAttribute('aria-hidden', 'true');
-      }
-    });
-
-    // Si se usa el overlay interno para demo, iniciar sesión localmente
-    loginSubmit.addEventListener('click', () => {
-      const name = loginName.value.trim() || 'Invitado';
-      const role = loginRole.value === 'admin' ? 'admin' : 'user';
-      currentUser = { name, role };
-      // guardar sesión
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      loginOverlay.style.display = 'none';
-      loginOverlay.setAttribute('aria-hidden', 'true');
-      loginForm.reset?.();
-      updateAuthUI();
-    });
-
-    function logout(){
-      currentUser = null;
-      localStorage.removeItem('currentUser');
-      updateAuthUI();
-    }
-
-    function updateAuthUI(){
-      // actualizar boton agregar
-      if (currentUser && currentUser.role === 'admin') {
+    function updateAuthUI() {
+      if (currentUser?.role === "admin") {
         addProductBtn.disabled = false;
-        addProductBtn.classList.remove('disabled');
       } else {
         addProductBtn.disabled = true;
-        addProductBtn.classList.add('disabled');
       }
 
-      // actualizar userArea
       if (!currentUser) {
         userArea.innerHTML = '<button id="loginBtn">Iniciar sesión</button>';
-        // rehook
-        document.getElementById('loginBtn').addEventListener('click', () => {
-          // redirige a la página de login/registro
-          location.href = 'login.html';
-        });
+        document.getElementById('loginBtn').onclick = () => location.href = "login.html";
       } else {
         userArea.innerHTML = `
-          <div class="user-badge" title="Usuario">${escapeHtml(currentUser.name)} (${escapeHtml(currentUser.role)})</div>
+          <div class="user-badge">${currentUser.name} (${currentUser.role})</div>
           <button id="logoutBtn">Cerrar sesión</button>
         `;
-        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('logoutBtn').onclick = () => {
+          currentUser = null;
+          localStorage.removeItem('currentUser');
+          updateAuthUI();
+          renderProductos();
+        };
       }
+      renderProductos();
     }
 
-    // Inicial: render
-    renderProductos(productos);
+    function filtrarCategoria(cat){
+      if (cat === "all") return renderProductos();
+      renderProductos(productos.filter(p => p.categoria === cat));
+    }
   </script>
 </body>
 </html>
