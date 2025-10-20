@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mi Catálogo - Iniciar Sesión</title>
+  <title>Mi Catálogo - Panel</title>
   <style>
     /* ESTILOS GENERALES */
     * {
@@ -17,12 +17,9 @@
       background-color: #f5f7fa;
       color: #333;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
     }
 
-    /* FORMULARIO DE LOGIN */
+    /* PANTALLA DE LOGIN/REGISTRO */
     .login-container {
       background-color: white;
       border-radius: 8px;
@@ -30,6 +27,7 @@
       width: 100%;
       max-width: 400px;
       padding: 30px;
+      margin: 50px auto;
     }
 
     .login-header {
@@ -412,6 +410,48 @@
       color: #334e7a;
       border-bottom: 2px solid #334e7a;
     }
+
+    /* BOTONES DE ADMIN */
+    .admin-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: flex-end;
+    }
+
+    .btn-add {
+      background-color: #334e7a;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-edit, .btn-delete {
+      background-color: transparent;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .btn-edit {
+      color: #334e7a;
+      border: 1px solid #334e7a;
+    }
+
+    .btn-delete {
+      color: #d46b08;
+      border: 1px solid #d46b08;
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
@@ -508,10 +548,34 @@
         </div>
       </div>
 
+      <!-- BOTONES DE ADMINISTRADOR -->
+      <div class="admin-actions" id="adminActions" style="display: none;">
+        <button class="btn-add" id="addProductBtn">+ Agregar Producto</button>
+      </div>
+
       <section class="products-grid" id="productsGrid">
         <!-- Product cards se inyectan aquí -->
       </section>
     </main>
+  </div>
+
+  <!-- OVERLAY + FORMULARIO DE PRODUCTOS -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <form class="form-container" id="formContainer">
+      <h3 id="formTitle">Agregar nuevo producto</h3>
+      <input type="hidden" id="productId" />
+      <input type="text" id="nombre" placeholder="Nombre del producto" required />
+      <div class="form-row">
+        <input type="number" id="precio" placeholder="Precio" min="0" step="0.01" required />
+        <input type="text" id="categoria" placeholder="Categoría (ej: ropa)" required />
+      </div>
+      <input type="text" id="imagen" placeholder="URL de imagen (opcional)" />
+      <textarea id="descripcion" rows="3" placeholder="Descripción (opcional)"></textarea>
+      <div class="form-actions">
+        <button class="btn-primary" id="guardarBtn">Guardar</button>
+        <button class="btn-cancel" id="cancelarBtn" type="button">Cancelar</button>
+      </div>
+    </form>
   </div>
 
   <script>
@@ -547,6 +611,7 @@
     let productos = [...productosEjemplo];
     let usuarioActual = null;
     let esAdmin = false;
+    let editandoProducto = false;
 
     // Elementos DOM
     const loginContainer = document.getElementById('loginContainer');
@@ -560,6 +625,19 @@
     const totalProducts = document.getElementById('totalProducts');
     const userName = document.getElementById('userName');
     const userRole = document.getElementById('userRole');
+    const adminActions = document.getElementById('adminActions');
+    const addProductBtn = document.getElementById('addProductBtn');
+    const overlay = document.getElementById('overlay');
+    const formContainer = document.getElementById('formContainer');
+    const formTitle = document.getElementById('formTitle');
+    const productId = document.getElementById('productId');
+    const nombreInput = document.getElementById('nombre');
+    const precioInput = document.getElementById('precio');
+    const categoriaInput = document.getElementById('categoria');
+    const imagenInput = document.getElementById('imagen');
+    const descripcionInput = document.getElementById('descripcion');
+    const guardarBtn = document.getElementById('guardarBtn');
+    const cancelarBtn = document.getElementById('cancelarBtn');
 
     // Cambiar entre login y registro
     loginTab.addEventListener('click', () => {
@@ -668,6 +746,13 @@
       userRole.textContent = usuarioActual.esAdmin ? 'Administrador' : 'Usuario';
       userRole.className = `user-role ${usuarioActual.esAdmin ? 'admin' : ''}`;
       
+      // Mostrar/ocultar acciones de administrador
+      if (usuarioActual.esAdmin) {
+        adminActions.style.display = 'flex';
+      } else {
+        adminActions.style.display = 'none';
+      }
+      
       // Actualizar productos
       renderizarProductos();
     }
@@ -703,6 +788,17 @@
       productos.forEach(producto => {
         const productCard = document.createElement('div');
         productCard.className = 'product-card';
+        
+        let adminButtons = '';
+        if (usuarioActual.esAdmin) {
+          adminButtons = `
+            <div>
+              <button class="btn-edit" onclick="editarProducto(${producto.id})">Editar</button>
+              <button class="btn-delete" onclick="eliminarProducto(${producto.id})">Eliminar</button>
+            </div>
+          `;
+        }
+        
         productCard.innerHTML = `
           <div class="product-image">
             ${producto.imagen ? 
@@ -714,11 +810,97 @@
             <div class="product-category">${producto.categoria}</div>
             <div class="product-price">$${producto.precio.toFixed(2)}</div>
             <div class="product-description">${producto.descripcion}</div>
+            ${adminButtons}
           </div>
         `;
         productsGrid.appendChild(productCard);
       });
     }
+
+    // Funciones para administrar productos
+    function mostrarFormularioProducto() {
+      editandoProducto = false;
+      formTitle.textContent = 'Agregar nuevo producto';
+      productId.value = '';
+      nombreInput.value = '';
+      precioInput.value = '';
+      categoriaInput.value = '';
+      imagenInput.value = '';
+      descripcionInput.value = '';
+      overlay.style.display = 'flex';
+    }
+
+    function editarProducto(id) {
+      const producto = productos.find(p => p.id === id);
+      if (producto) {
+        editandoProducto = true;
+        formTitle.textContent = 'Editar producto';
+        productId.value = producto.id;
+        nombreInput.value = producto.nombre;
+        precioInput.value = producto.precio;
+        categoriaInput.value = producto.categoria;
+        imagenInput.value = producto.imagen || '';
+        descripcionInput.value = producto.descripcion || '';
+        overlay.style.display = 'flex';
+      }
+    }
+
+    function eliminarProducto(id) {
+      if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+        productos = productos.filter(p => p.id !== id);
+        renderizarProductos();
+      }
+    }
+
+    function guardarProducto() {
+      const id = productId.value;
+      const nombre = nombreInput.value;
+      const precio = parseFloat(precioInput.value);
+      const categoria = categoriaInput.value;
+      const imagen = imagenInput.value;
+      const descripcion = descripcionInput.value;
+      
+      if (!nombre || !precio || !categoria) {
+        alert('Por favor, completa los campos obligatorios');
+        return;
+      }
+      
+      if (editandoProducto) {
+        // Editar producto existente
+        const index = productos.findIndex(p => p.id == id);
+        if (index !== -1) {
+          productos[index] = {
+            id: parseInt(id),
+            nombre,
+            precio,
+            categoria,
+            imagen,
+            descripcion
+          };
+        }
+      } else {
+        // Agregar nuevo producto
+        const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+        productos.push({
+          id: nuevoId,
+          nombre,
+          precio,
+          categoria,
+          imagen,
+          descripcion
+        });
+      }
+      
+      renderizarProductos();
+      overlay.style.display = 'none';
+    }
+
+    // Event Listeners
+    addProductBtn.addEventListener('click', mostrarFormularioProducto);
+    guardarBtn.addEventListener('click', guardarProducto);
+    cancelarBtn.addEventListener('click', () => {
+      overlay.style.display = 'none';
+    });
 
     // Cerrar sesión
     logoutBtn.addEventListener('click', () => {
