@@ -385,76 +385,38 @@
       color: #666;
     }
 
-    /* ======= FORMULARIO DE PAGO ======= */
-    .payment-form {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    .payment-form .form-group {
-      margin-bottom: 15px;
-    }
-
-    .payment-form .full-width {
-      grid-column: 1 / -1;
-    }
-
-    .payment-section {
-      margin-bottom: 25px;
-      padding-bottom: 15px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .payment-section h4 {
-      color: #002147;
-      margin-bottom: 15px;
-    }
-
-    .payment-methods {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .payment-method {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .payment-method.selected {
-      border-color: #002147;
-      background-color: #e6f2ff;
-    }
-
-    .payment-method:hover {
-      background-color: #f0f0f0;
-    }
-
-    .payment-summary {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 5px;
+    /* ======= HISTORIAL ======= */
+    .history-container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       margin-top: 20px;
     }
 
-    .payment-summary-item {
+    .history-item {
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .history-header {
       display: flex;
       justify-content: space-between;
       margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
     }
 
-    .payment-summary-total {
-      font-weight: bold;
-      font-size: 18px;
-      border-top: 1px solid #ddd;
-      padding-top: 10px;
+    .history-products {
       margin-top: 10px;
+    }
+
+    .history-product {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -585,87 +547,6 @@
     </div>
   </div>
 
-  <!-- ======= FORMULARIO DE PAGO ======= -->
-  <div class="overlay" id="paymentOverlay">
-    <div class="form-container">
-      <h3>Finalizar Compra</h3>
-      
-      <div class="payment-section">
-        <h4>Información de Envío</h4>
-        <div class="payment-form">
-          <div class="form-group">
-            <label for="shippingName">Nombre completo</label>
-            <input type="text" id="shippingName" required>
-          </div>
-          <div class="form-group">
-            <label for="shippingPhone">Teléfono</label>
-            <input type="tel" id="shippingPhone" required>
-          </div>
-          <div class="form-group full-width">
-            <label for="shippingAddress">Dirección</label>
-            <input type="text" id="shippingAddress" required>
-          </div>
-          <div class="form-group">
-            <label for="shippingCity">Ciudad</label>
-            <input type="text" id="shippingCity" required>
-          </div>
-          <div class="form-group">
-            <label for="shippingZip">Código Postal</label>
-            <input type="text" id="shippingZip" required>
-          </div>
-        </div>
-      </div>
-      
-      <div class="payment-section">
-        <h4>Método de Pago</h4>
-        <div class="payment-methods">
-          <div class="payment-method" data-method="credit">
-            💳 Tarjeta de Crédito
-          </div>
-          <div class="payment-method" data-method="debit">
-            💳 Tarjeta de Débito
-          </div>
-          <div class="payment-method" data-method="paypal">
-            🅿️ PayPal
-          </div>
-        </div>
-        
-        <div class="payment-form" id="creditCardForm">
-          <div class="form-group">
-            <label for="cardName">Nombre en la tarjeta</label>
-            <input type="text" id="cardName" required>
-          </div>
-          <div class="form-group">
-            <label for="cardNumber">Número de tarjeta</label>
-            <input type="text" id="cardNumber" required>
-          </div>
-          <div class="form-group">
-            <label for="cardExpiry">Fecha de expiración</label>
-            <input type="text" id="cardExpiry" placeholder="MM/AA" required>
-          </div>
-          <div class="form-group">
-            <label for="cardCVC">CVC</label>
-            <input type="text" id="cardCVC" required>
-          </div>
-        </div>
-      </div>
-      
-      <div class="payment-summary">
-        <h4>Resumen de Compra</h4>
-        <div id="paymentSummaryItems"></div>
-        <div class="payment-summary-item payment-summary-total">
-          <span>Total:</span>
-          <span id="paymentTotal">$0.00</span>
-        </div>
-      </div>
-      
-      <div class="form-actions">
-        <button class="btn-primary" id="btnConfirmPayment">Confirmar Pago</button>
-        <button class="btn-cancel" id="btnCancelPayment">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
   <script>
     // ========= DATOS SIMULADOS =========
     let usuario = null;
@@ -705,11 +586,6 @@
     const pageTitle = document.getElementById("pageTitle");
     const contentArea = document.getElementById("contentArea");
     const cartCount = document.getElementById("cartCount");
-    const paymentOverlay = document.getElementById("paymentOverlay");
-    const btnConfirmPayment = document.getElementById("btnConfirmPayment");
-    const btnCancelPayment = document.getElementById("btnCancelPayment");
-    const paymentSummaryItems = document.getElementById("paymentSummaryItems");
-    const paymentTotal = document.getElementById("paymentTotal");
 
     // ========= AUTENTICACIÓN =========
     loginTab.addEventListener('click', () => {
@@ -813,20 +689,24 @@
 
     // ========= FUNCIONES PRINCIPALES =========
     function mostrarProductos() {
+      pageTitle.textContent = "Catálogo de Productos";
+      contentArea.innerHTML = '<div class="products-grid" id="productosGrid"></div>';
+      const productosGrid = document.getElementById("productosGrid");
+      
       productosGrid.innerHTML = "";
       productos.forEach(p => {
         const card = document.createElement("div");
         card.className = "product-card";
         card.innerHTML = `
-          <div class="product-image">🛍</div>
+          <div class="product-image">🛍️</div>
           <div class="product-info">
             <div class="product-name">${p.nombre}</div>
             <div class="product-category">${p.categoria}</div>
             <div class="product-price">$${p.precio}</div>
             <div>
               ${usuario.esAdmin
-                ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
-                   <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
+                ? `<button class="btn-edit" onclick="editarProducto(${p.id})">Editar</button>
+                   <button class="btn-delete" onclick="borrarProducto(${p.id})">Borrar</button>`
                 : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`
               }
             </div>
@@ -843,7 +723,7 @@
       alert(`${p.nombre} agregado al carrito`);
     }
 
-    function editar(id) {
+    function editarProducto(id) {
       const p = productos.find(x => x.id === id);
       editandoProducto = true;
       formTitle.textContent = "Editar Producto";
@@ -855,7 +735,7 @@
       overlay.style.display = "flex";
     }
 
-    function borrar(id) {
+    function borrarProducto(id) {
       if (confirm("¿Estás seguro de que quieres eliminar este producto?")) {
         productos = productos.filter(x => x.id !== id);
         mostrarProductos();
@@ -964,7 +844,7 @@
             <span>Total:</span>
             <span>$${total}</span>
           </div>
-          <button class="btn-checkout" onclick="mostrarFormularioPago()">Proceder al Pago</button>
+          <button class="btn-checkout" onclick="procesarCompra()">Procesar Compra</button>
         </div>
       `;
       
@@ -977,80 +857,74 @@
       mostrarCarrito();
     }
 
-    // ========= FORMULARIO DE PAGO =========
-    function mostrarFormularioPago() {
-      // Configurar métodos de pago
-      document.querySelectorAll('.payment-method').forEach(method => {
-        method.addEventListener('click', function() {
-          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
-          this.classList.add('selected');
-        });
-      });
-      
-      // Establecer el primer método como seleccionado por defecto
-      document.querySelector('.payment-method').classList.add('selected');
-      
-      // Actualizar resumen de compra
-      let summaryHtml = '';
-      let total = 0;
-      
-      carrito.forEach(item => {
-        summaryHtml += `
-          <div class="payment-summary-item">
-            <span>${item.nombre}</span>
-            <span>$${item.precio}</span>
-          </div>
-        `;
-        total += item.precio;
-      });
-      
-      paymentSummaryItems.innerHTML = summaryHtml;
-      paymentTotal.textContent = `$${total}`;
-      
-      // Mostrar overlay de pago
-      paymentOverlay.style.display = "flex";
-    }
-
-    btnConfirmPayment.addEventListener('click', () => {
-      // Validar formulario
-      const shippingName = document.getElementById('shippingName').value;
-      const shippingPhone = document.getElementById('shippingPhone').value;
-      const shippingAddress = document.getElementById('shippingAddress').value;
-      const shippingCity = document.getElementById('shippingCity').value;
-      const shippingZip = document.getElementById('shippingZip').value;
-      
-      if (!shippingName || !shippingPhone || !shippingAddress || !shippingCity || !shippingZip) {
-        alert('Por favor, completa todos los campos de envío');
+    function procesarCompra() {
+      if (carrito.length === 0) {
+        alert('El carrito está vacío');
         return;
       }
       
-      // En una aplicación real, aquí procesaríamos el pago
-      alert('¡Pago procesado exitosamente! Gracias por tu compra.');
-      
-      // Agregar al historial
+      const total = carrito.reduce((sum, item) => sum + item.precio, 0);
       const compra = {
         fecha: new Date().toLocaleDateString(),
         productos: [...carrito],
-        total: carrito.reduce((sum, item) => sum + item.precio, 0)
+        total: total
       };
-      historial.push(compra);
       
-      // Limpiar carrito
+      historial.push(compra);
+      alert(`¡Compra procesada exitosamente! Total: $${total}`);
+      
       carrito = [];
       actualizarContadorCarrito();
-      
-      // Cerrar formulario y volver al catálogo
-      paymentOverlay.style.display = "none";
-      mostrarProductos();
-      pageTitle.textContent = "Catálogo de Productos";
-    });
+      mostrarCarrito();
+    }
 
-    btnCancelPayment.addEventListener('click', () => {
-      paymentOverlay.style.display = "none";
-    });
+    // ========= HISTORIAL =========
+    function mostrarHistorial() {
+      pageTitle.textContent = "Historial de Compras";
+      
+      if (historial.length === 0) {
+        contentArea.innerHTML = `
+          <div class="history-container">
+            <div class="empty-cart">
+              <h3>No hay compras en el historial</h3>
+              <p>Realiza tu primera compra para verla aquí</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = '<div class="history-container">';
+      
+      historial.forEach((compra, index) => {
+        html += `
+          <div class="history-item">
+            <div class="history-header">
+              <strong>Compra #${index + 1}</strong>
+              <span>${compra.fecha}</span>
+            </div>
+            <div class="history-products">
+              ${compra.productos.map(producto => `
+                <div class="history-product">
+                  <span>${producto.nombre}</span>
+                  <span>$${producto.precio}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div style="text-align: right; margin-top: 10px; font-weight: bold;">
+              Total: $${compra.total}
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      contentArea.innerHTML = html;
+    }
 
     // ========= NAVEGACIÓN =========
-    document.getElementById("menuCarrito").addEventListener('click', () => {
+    document.getElementById("menuCarrito").addEventListener('click', (e) => {
+      e.preventDefault();
       document.querySelectorAll('.sidebar-menu li a').forEach(item => {
         item.classList.remove('active');
       });
@@ -1058,7 +932,8 @@
       mostrarCarrito();
     });
 
-    document.getElementById("menuHistorial").addEventListener('click', () => {
+    document.getElementById("menuHistorial").addEventListener('click', (e) => {
+      e.preventDefault();
       document.querySelectorAll('.sidebar-menu li a').forEach(item => {
         item.classList.remove('active');
       });
@@ -1066,10 +941,31 @@
       mostrarHistorial();
     });
 
-    document.getElementById("menuCatalogo").addEventListener('click', () => {
+    document.getElementById("menuCatalogo").addEventListener('click', (e) => {
+      e.preventDefault();
       document.querySelectorAll('.sidebar-menu li a').forEach(item => {
         item.classList.remove('active');
       });
       document.getElementById("menuCatalogo").classList.add('active');
       mostrarProductos();
-      pageTitle.textContent = "
+    });
+
+    // ======== CERRAR SESIÓN ========
+    document.getElementById("logoutBtn").addEventListener('click', () => {
+      usuario = null;
+      carrito = [];
+      loginScreen.style.display = "flex";
+      mainApp.style.display = "none";
+      loginForm.reset();
+      registerForm.reset();
+      loginTab.click();
+    });
+
+    // ========= INICIO =========
+    document.addEventListener("DOMContentLoaded", () => {
+      loginScreen.style.display = "flex";
+      mainApp.style.display = "none";
+    });
+  </script>
+</body>
+</html>
