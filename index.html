@@ -1,128 +1,496 @@
-// ========= FUNCIONES PRINCIPALES =========
-function mostrarProductos() {
-  productosGrid.innerHTML = "";
-  productos.forEach(p => {
-    const card = document.createElement("div");
-    card.className = "product-card";
-    card.innerHTML = `
-      <div class="product-image">🛍</div>
-      <div class="product-info">
-        <div class="product-name">${p.nombre}</div>
-        <div class="product-category">${p.categoria}</div>
-        <div class="product-price">$${p.precio}</div>
-        <div>
-          ${usuario.esAdmin
-            ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
-               <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
-            : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`
-          }
+<script>
+    // ========= DATOS SIMULADOS =========
+    let usuario = null;
+    let productos = [
+      {id: 1, nombre: "Laptop HP", categoria: "Tecnología", precio: 18000},
+      {id: 2, nombre: "Audífonos JBL", categoria: "Audio", precio: 1200},
+      {id: 3, nombre: "Cereal Kellogg's", categoria: "Comida", precio: 85},
+      {id: 4, nombre: "Camisa Polo", categoria: "Ropa", precio: 350}
+    ];
+
+    let carrito = [];
+    let historial = [];
+    let editandoProducto = false;
+
+    // ========= ELEMENTOS =========
+    const loginScreen = document.getElementById("loginScreen");
+    const mainApp = document.getElementById("mainApp");
+    const loginForm = document.getElementById("loginForm");
+    const registerForm = document.getElementById("registerForm");
+    const loginTab = document.getElementById("loginTab");
+    const registerTab = document.getElementById("registerTab");
+    const userName = document.getElementById("userName");
+    const userRole = document.getElementById("userRole");
+    const sidebarUser = document.getElementById("sidebarUser");
+    const productosGrid = document.getElementById("productosGrid");
+    const adminActions = document.getElementById("adminActions");
+    const btnAgregar = document.getElementById("btnAgregar");
+    const overlay = document.getElementById("overlay");
+    const formTitle = document.getElementById("formTitle");
+    const productId = document.getElementById("productId");
+    const productName = document.getElementById("productName");
+    const productCategory = document.getElementById("productCategory");
+    const productPrice = document.getElementById("productPrice");
+    const productImage = document.getElementById("productImage");
+    const btnGuardar = document.getElementById("btnGuardar");
+    const btnCancelar = document.getElementById("btnCancelar");
+    const pageTitle = document.getElementById("pageTitle");
+    const contentArea = document.getElementById("contentArea");
+    const cartCount = document.getElementById("cartCount");
+    const paymentOverlay = document.getElementById("paymentOverlay");
+    const btnConfirmPayment = document.getElementById("btnConfirmPayment");
+    const btnCancelPayment = document.getElementById("btnCancelPayment");
+    const paymentSummaryItems = document.getElementById("paymentSummaryItems");
+    const paymentTotal = document.getElementById("paymentTotal");
+
+    // ========= AUTENTICACIÓN =========
+    loginTab.addEventListener('click', () => {
+      loginTab.classList.add('active');
+      registerTab.classList.remove('active');
+      loginForm.style.display = 'block';
+      registerForm.style.display = 'none';
+    });
+
+    registerTab.addEventListener('click', () => {
+      registerTab.classList.add('active');
+      loginTab.classList.remove('active');
+      registerForm.style.display = 'block';
+      loginForm.style.display = 'none';
+    });
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      if (email && password) {
+        iniciarSesion(email, password);
+      } else {
+        alert('Por favor, completa todos los campos');
+      }
+    });
+
+    registerForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      
+      if (password !== confirmPassword) {
+        alert('Las contraseñas no coinciden');
+        return;
+      }
+      
+      if (name && email && password) {
+        registrarUsuario(name, email, password);
+      } else {
+        alert('Por favor, completa todos los campos');
+      }
+    });
+
+    function iniciarSesion(email, password) {
+      // Determinar si es admin basado en el dominio del correo
+      const esAdmin = email.endsWith('@tecmilenio.mx');
+      
+      // Guardar información del usuario
+      usuario = {
+        nombre: email.split('@')[0],
+        email: email,
+        esAdmin: esAdmin
+      };
+      
+      // Actualizar la interfaz
+      actualizarInterfazUsuario();
+      
+      // Mostrar el contenido principal
+      loginScreen.style.display = 'none';
+      mainApp.style.display = 'block';
+    }
+
+    function registrarUsuario(nombre, email, password) {
+      // Determinar si es admin basado en el dominio del correo
+      const esAdmin = email.endsWith('@tecmilenio.mx');
+      
+      // Guardar información del usuario
+      usuario = {
+        nombre: nombre,
+        email: email,
+        esAdmin: esAdmin
+      };
+      
+      // Actualizar la interfaz
+      actualizarInterfazUsuario();
+      
+      // Mostrar el contenido principal
+      loginScreen.style.display = 'none';
+      mainApp.style.display = 'block';
+    }
+
+    function actualizarInterfazUsuario() {
+      userName.textContent = usuario.nombre;
+      sidebarUser.textContent = usuario.nombre;
+      userRole.textContent = usuario.esAdmin ? "Administrador" : "Usuario";
+      userRole.className = usuario.esAdmin ? "user-role admin" : "user-role user";
+      
+      if (usuario.esAdmin) {
+        adminActions.style.display = "block";
+      } else {
+        adminActions.style.display = "none";
+      }
+      
+      mostrarProductos();
+      actualizarContadorCarrito();
+    }
+
+    // ========= FUNCIONES PRINCIPALES =========
+    function mostrarProductos() {
+      productosGrid.innerHTML = "";
+      productos.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+        
+        let botones = '';
+        if (usuario.esAdmin) {
+          botones = `
+            <button class="btn-edit" onclick="editar(${p.id})">Editar</button>
+            <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>
+          `;
+        } else {
+          botones = `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`;
+        }
+        
+        card.innerHTML = `
+          <div class="product-image">🛍</div>
+          <div class="product-info">
+            <div class="product-name">${p.nombre}</div>
+            <div class="product-category">${p.categoria}</div>
+            <div class="product-price">$${p.precio}</div>
+            <div>${botones}</div>
+          </div>
+        `;
+        productosGrid.appendChild(card);
+      });
+    }
+
+    function agregarAlCarrito(id) {
+      const p = productos.find(x => x.id === id);
+      if (p) {
+        carrito.push(p);
+        actualizarContadorCarrito();
+        alert(p.nombre + ' agregado al carrito');
+      }
+    }
+
+    function editar(id) {
+      const p = productos.find(x => x.id === id);
+      if (p) {
+        editandoProducto = true;
+        formTitle.textContent = "Editar Producto";
+        productId.value = p.id;
+        productName.value = p.nombre;
+        productCategory.value = p.categoria;
+        productPrice.value = p.precio;
+        productImage.value = p.imagen || "";
+        overlay.style.display = "flex";
+      }
+    }
+
+    function borrar(id) {
+      if (confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+        productos = productos.filter(x => x.id !== id);
+        mostrarProductos();
+      }
+    }
+
+    function actualizarContadorCarrito() {
+      cartCount.textContent = carrito.length;
+    }
+
+    // ========= GESTIÓN DE PRODUCTOS =========
+    btnAgregar.addEventListener('click', () => {
+      editandoProducto = false;
+      formTitle.textContent = "Agregar Producto";
+      productId.value = "";
+      productName.value = "";
+      productCategory.value = "";
+      productPrice.value = "";
+      productImage.value = "";
+      overlay.style.display = "flex";
+    });
+
+    btnGuardar.addEventListener('click', () => {
+      const id = productId.value;
+      const nombre = productName.value;
+      const categoria = productCategory.value;
+      const precio = parseFloat(productPrice.value);
+      const imagen = productImage.value;
+
+      if (!nombre || !categoria || !precio) {
+        alert("Por favor, completa todos los campos obligatorios");
+        return;
+      }
+
+      if (editandoProducto) {
+        // Editar producto existente
+        const index = productos.findIndex(p => p.id == id);
+        if (index !== -1) {
+          productos[index] = {
+            id: parseInt(id),
+            nombre,
+            categoria,
+            precio,
+            imagen
+          };
+        }
+      } else {
+        // Agregar nuevo producto
+        const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+        productos.push({
+          id: nuevoId,
+          nombre,
+          categoria,
+          precio,
+          imagen
+        });
+      }
+
+      mostrarProductos();
+      overlay.style.display = "none";
+    });
+
+    btnCancelar.addEventListener('click', () => {
+      overlay.style.display = "none";
+    });
+
+    // ========= CARRITO =========
+    function mostrarCarrito() {
+      pageTitle.textContent = "Carrito de Compras";
+      
+      if (carrito.length === 0) {
+        contentArea.innerHTML = `
+          <div class="cart-container">
+            <div class="empty-cart">
+              <h3>Tu carrito está vacío</h3>
+              <p>Agrega productos desde el catálogo</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = `
+        <div class="cart-container">
+          <h2 style="color:#002147; margin-bottom:20px;">Productos en tu carrito</h2>
+      `;
+      
+      let total = 0;
+      carrito.forEach((item, index) => {
+        html += `
+          <div class="cart-item">
+            <div class="cart-item-info">
+              <div class="cart-item-name">${item.nombre}</div>
+              <div class="cart-item-price">$${item.precio}</div>
+            </div>
+            <div class="cart-item-actions">
+              <button class="btn-remove" onclick="eliminarDelCarrito(${index})">Eliminar</button>
+            </div>
+          </div>
+        `;
+        total += item.precio;
+      });
+      
+      html += `
+          <div class="cart-total">
+            <span>Total:</span>
+            <span>$${total}</span>
+          </div>
+          <button class="btn-checkout" onclick="mostrarFormularioPago()">Proceder al Pago</button>
         </div>
-      </div>
-    `;
-    productosGrid.appendChild(card);
-  });
-}
+      `;
+      
+      contentArea.innerHTML = html;
+    }
 
-function agregarAlCarrito(id) {
-  const p = productos.find(x => x.id === id);
-  carrito.push(p);
-  actualizarContadorCarrito();
-  alert(`${p.nombre} agregado al carrito`);
-}
+    function eliminarDelCarrito(index) {
+      carrito.splice(index, 1);
+      actualizarContadorCarrito();
+      mostrarCarrito();
+    }
 
-// ========= NAVEGACIÓN =========
-document.getElementById("menuCarrito").addEventListener('click', () => {
-  document.querySelectorAll('.sidebar-menu li a').forEach(item => {
-    item.classList.remove('active');
-  });
-  document.getElementById("menuCarrito").classList.add('active');
-  mostrarCarrito();
-});
+    // ========= FORMULARIO DE PAGO =========
+    function mostrarFormularioPago() {
+      // Configurar métodos de pago
+      document.querySelectorAll('.payment-method').forEach(method => {
+        method.addEventListener('click', function() {
+          document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+          this.classList.add('selected');
+        });
+      });
+      
+      // Establecer el primer método como seleccionado por defecto
+      document.querySelector('.payment-method').classList.add('selected');
+      
+      // Actualizar resumen de compra
+      let summaryHtml = '';
+      let total = 0;
+      
+      carrito.forEach(item => {
+        summaryHtml += `
+          <div class="payment-summary-item">
+            <span>${item.nombre}</span>
+            <span>$${item.precio}</span>
+          </div>
+        `;
+        total += item.precio;
+      });
+      
+      paymentSummaryItems.innerHTML = summaryHtml;
+      paymentTotal.textContent = '$' + total;
+      
+      // Mostrar overlay de pago
+      paymentOverlay.style.display = "flex";
+    }
 
-document.getElementById("menuHistorial").addEventListener('click', () => {
-  document.querySelectorAll('.sidebar-menu li a').forEach(item => {
-    item.classList.remove('active');
-  });
-  document.getElementById("menuHistorial").classList.add('active');
-  mostrarHistorial();
-});
+    btnConfirmPayment.addEventListener('click', () => {
+      // Validar formulario
+      const shippingName = document.getElementById('shippingName').value;
+      const shippingPhone = document.getElementById('shippingPhone').value;
+      const shippingAddress = document.getElementById('shippingAddress').value;
+      const shippingCity = document.getElementById('shippingCity').value;
+      const shippingZip = document.getElementById('shippingZip').value;
+      
+      if (!shippingName || !shippingPhone || !shippingAddress || !shippingCity || !shippingZip) {
+        alert('Por favor, completa todos los campos de envío');
+        return;
+      }
+      
+      // En una aplicación real, aquí procesaríamos el pago
+      alert('¡Pago procesado exitosamente! Gracias por tu compra.');
+      
+      // Agregar al historial
+      const compra = {
+        fecha: new Date().toLocaleDateString(),
+        productos: [...carrito],
+        total: carrito.reduce((sum, item) => sum + item.precio, 0)
+      };
+      historial.push(compra);
+      
+      // Limpiar carrito
+      carrito = [];
+      actualizarContadorCarrito();
+      
+      // Cerrar formulario y volver al catálogo
+      paymentOverlay.style.display = "none";
+      mostrarProductos();
+      pageTitle.textContent = "Catálogo de Productos";
+    });
 
-document.getElementById("menuCatalogo").addEventListener('click', () => {
-  document.querySelectorAll('.sidebar-menu li a').forEach(item => {
-    item.classList.remove('active');
-  });
-  document.getElementById("menuCatalogo").classList.add('active');
-  mostrarProductos();
-});
+    btnCancelPayment.addEventListener('click', () => {
+      paymentOverlay.style.display = "none";
+    });
 
-// ======= CERRAR SESIÓN =======
-document.getElementById("logoutBtn").addEventListener('click', () => {
-  if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
-    usuario = null;
-    carrito = [];
-    mainApp.style.display = 'none';
-    loginScreen.style.display = 'flex';
-    
-    // Limpiar formularios
-    document.getElementById('email').value = '';
-    document.getElementById('password').value = '';
-    document.getElementById('regName').value = '';
-    document.getElementById('regEmail').value = '';
-    document.getElementById('regPassword').value = '';
-    document.getElementById('regConfirmPassword').value = '';
-    
-    // Volver a pestaña de login
-    loginTab.classList.add('active');
-    registerTab.classList.remove('active');
-    loginForm.style.display = 'block';
-    registerForm.style.display = 'none';
-  }
-});
+    // ========= NAVEGACIÓN =========
+    document.getElementById("menuCarrito").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCarrito").classList.add('active');
+      mostrarCarrito();
+    });
 
-// ======= MOSTRAR HISTORIAL =======
-function mostrarHistorial() {
-  pageTitle.textContent = "Historial de Compras";
-  
-  if (historial.length === 0) {
-    contentArea.innerHTML = `
-      <div class="cart-container">
-        <div class="empty-cart">
-          <h3>No hay compras realizadas</h3>
-          <p>Tu historial de compras aparecerá aquí</p>
-        </div>
-      </div>
-    `;
-    return;
-  }
-  
-  let html = `
-    <div class="cart-container">
-      <h2 style="color:#002147; margin-bottom:20px;">Tus Compras Anteriores</h2>
-  `;
-  
-  historial.forEach((compra, index) => {
-    html += `
-      <div style="border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <strong>Compra #${index + 1}</strong>
-          <span>Fecha: ${compra.fecha}</span>
-        </div>
-        <div style="margin-bottom: 10px;">
-          ${compra.productos.map(p => `
+    document.getElementById("menuHistorial").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuHistorial").classList.add('active');
+      mostrarHistorial();
+    });
+
+    document.getElementById("menuCatalogo").addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-menu li a').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById("menuCatalogo").classList.add('active');
+      mostrarProductos();
+      pageTitle.textContent = "Catálogo de Productos";
+    });
+
+    // ======= CERRAR SESIÓN =======
+    document.getElementById("logoutBtn").addEventListener('click', () => {
+      if (confirm("¿Estás seguro de que quieres cerrar sesión?")) {
+        usuario = null;
+        carrito = [];
+        mainApp.style.display = 'none';
+        loginScreen.style.display = 'flex';
+        
+        // Limpiar formularios
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+        document.getElementById('regConfirmPassword').value = '';
+        
+        // Volver a pestaña de login
+        loginTab.classList.add('active');
+        registerTab.classList.remove('active');
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      }
+    });
+
+    // ======= MOSTRAR HISTORIAL =======
+    function mostrarHistorial() {
+      pageTitle.textContent = "Historial de Compras";
+      
+      if (historial.length === 0) {
+        contentArea.innerHTML = `
+          <div class="cart-container">
+            <div class="empty-cart">
+              <h3>No hay compras realizadas</h3>
+              <p>Tu historial de compras aparecerá aquí</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      let html = `
+        <div class="cart-container">
+          <h2 style="color:#002147; margin-bottom:20px;">Tus Compras Anteriores</h2>
+      `;
+      
+      historial.forEach((compra, index) => {
+        html += `
+          <div style="border: 1px solid #eee; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+              <strong>Compra #${index + 1}</strong>
+              <span>Fecha: ${compra.fecha}</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+        `;
+        
+        compra.productos.forEach(p => {
+          html += `
             <div style="display: flex; justify-content: space-between; padding: 5px 0;">
               <span>${p.nombre}</span>
               <span>$${p.precio}</span>
             </div>
-          `).join('')}
-        </div>
-        <div style="border-top: 1px solid #002147; padding-top: 10px; font-weight: bold; display: flex; justify-content: space-between;">
-          <span>Total:</span>
-          <span>$${compra.total}</span>
-        </div>
-      </div>
-    `;
-  });
-  
-  html += `</div>`;
-  contentArea.innerHTML = html;
-}
+          `;
+        });
+        
+        html += `
+            </div>
+            <div style="border-top: 1px solid #002147; padding-top: 10px; font-weight: bold; display: flex; justify-content: space-between;">
+              <span>Total:</span>
+              <span>$${compra.total}</span>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `</div>`;
+      contentArea.innerHTML = html;
+    }
+</script>
