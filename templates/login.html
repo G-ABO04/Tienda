@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login y Registro - MisSup</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #004080, #002147);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 350px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    .store-name { font-size: 1.8rem; font-weight: bold; color: #002147; margin-bottom: 10px; }
+    h2 { color: #004080; margin-bottom: 20px; }
+    input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    .actions { display: flex; gap: 10px; justify-content: center; margin-top: 12px; }
+    input[type="submit"], button.toggle { background: #004080; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; }
+    button.toggle { background: #002147; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="store-name">MisSup</div>
+    <h2 id="form-title">Iniciar sesión</h2>
+
+    <form id="login-form">
+      <input type="text" name="usuario" placeholder="Usuario" required>
+      <input type="password" name="clave" placeholder="Contraseña" required>
+      <select name="tipo" required>
+        <option value="" disabled selected>Selecciona tipo de usuario</option>
+        <option value="usuario">Usuario normal</option>
+        <option value="admin">Administrador</option>
+      </select>
+      <div class="actions">
+        <input type="submit" value="Entrar">
+        <button type="button" class="toggle" id="show-register">Registro</button>
+      </div>
+    </form>
+
+    <form id="register-form" class="hidden">
+      <input type="text" name="nombre" placeholder="Nombre completo" required>
+      <input id="reg-email" type="email" name="email" placeholder="Correo electrónico" required>
+      <input type="text" name="usuario_reg" placeholder="Usuario" required>
+      <input type="password" name="clave_reg" placeholder="Contraseña" required>
+      <select id="regRole" name="role" required>
+        <option value="user" selected>Usuario normal</option>
+        <option value="admin">Administrador</option>
+      </select>
+      <div class="actions">
+        <input type="submit" value="Registrar">
+        <button type="button" class="toggle" id="show-login">Volver</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const DOMAIN_ALLOWED = '@tecmilenio.mx';
+
+    const showRegisterBtn = document.getElementById('show-register');
+    const showLoginBtn = document.getElementById('show-login');
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+    const title = document.getElementById('form-title');
+    const regEmailInput = document.getElementById('reg-email');
+    const regRoleSelect = document.getElementById('regRole');
+
+    // Cambiar entre login y registro
+    showRegisterBtn.addEventListener('click', () => {
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+      title.textContent = 'Registro';
+      validateEmailForAdmin();
+    });
+    showLoginBtn.addEventListener('click', () => {
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      title.textContent = 'Iniciar sesión';
+    });
+
+    function validateEmailForAdmin() {
+      const email = (regEmailInput.value || '').trim().toLowerCase();
+      const adminOption = regRoleSelect.querySelector('option[value="admin"]');
+      if (!email.endsWith(DOMAIN_ALLOWED)) {
+        adminOption.disabled = true;
+        if (regRoleSelect.value === 'admin') regRoleSelect.value = 'user';
+      } else {
+        adminOption.disabled = false;
+      }
+    }
+    regEmailInput.addEventListener('input', validateEmailForAdmin);
+
+    // Registro (solo guarda en localStorage)
+    registerForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const nombre = registerForm.nombre.value;
+      const email = regEmailInput.value.trim().toLowerCase();
+      const usuario = registerForm.usuario_reg.value;
+      const clave = registerForm.clave_reg.value;
+      const role = regRoleSelect.value;
+
+      if (role === 'admin' && !email.endsWith(DOMAIN_ALLOWED)) {
+        alert('Solo correos con dominio ' + DOMAIN_ALLOWED + ' pueden registrarse como administradores.');
+        return;
+      }
+
+      // Guardamos usuario en localStorage
+      localStorage.setItem('currentUser', JSON.stringify({ nombre, email, usuario, role }));
+      alert('Registro exitoso. Ahora inicia sesión.');
+      registerForm.reset();
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      title.textContent = 'Iniciar sesión';
+    });
+
+    // Login
+    loginForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const usuario = loginForm.usuario.value;
+      const clave = loginForm.clave.value;
+      const tipo = loginForm.tipo.value;
+
+      // Verificar que haya un usuario registrado
+      const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+      if (!savedUser) {
+        alert('Primero debes registrarte.');
+        return;
+      }
+
+      if (usuario === savedUser.usuario && tipo === savedUser.role) {
+        alert('Inicio de sesión exitoso');
+        window.location.href = 'index.html';
+      } else {
+        alert('Usuario o tipo incorrecto');
+      }
+    });
+  </script>
+</body>
+</html>
