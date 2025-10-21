@@ -231,17 +231,18 @@
 
     .product-card:hover { transform: translateY(-5px); }
     
-    /* ESTILO MODIFICADO PARA IMAGEN */
+    /* ESTILO CORREGIDO PARA IMAGEN */
     .product-image { 
       height: 150px; 
-      background: #e6e9ef; 
+      background-color: #e6e9ef; /* Usar background-color para el fondo por defecto */
       display: flex; 
       align-items: center; 
       justify-content: center; 
       font-size: 50px; 
-      /* Añadido para manejo de fondo cuando hay URL */
+      /* Propiedades clave para la imagen de URL */
       background-size: cover; 
       background-position: center; 
+      background-repeat: no-repeat;
     }
 
     .product-info { padding: 15px; }
@@ -726,8 +727,9 @@
     // ========= DATOS SIMULADOS =========
     let usuario = null;
     let productos = [
-      {id: 1, nombre: "Laptop HP", categoria: "Tecnología", precio: 18000, imagen: ""}, // Añadí la propiedad 'imagen'
-      {id: 2, nombre: "Audífonos JBL", categoria: "Audio", precio: 1200, imagen: ""},
+      // Agregué una imagen de ejemplo para que veas cómo debe funcionar
+      {id: 1, nombre: "Laptop HP", categoria: "Tecnología", precio: 18000, imagen: "https://via.placeholder.com/150/0047ab/FFFFFF?text=Laptop"}, 
+      {id: 2, nombre: "Audífonos JBL", categoria: "Audio", precio: 1200, imagen: "https://via.placeholder.com/150/ffb366/000000?text=Audifonos"},
       {id: 3, nombre: "Cereal Kellogg's", categoria: "Comida", precio: 85, imagen: ""},
       {id: 4, nombre: "Camisa Polo", categoria: "Ropa", precio: 350, imagen: ""}
     ];
@@ -916,14 +918,16 @@
         const card = document.createElement("div");
         card.className = "product-card";
         
-        // 💡 MODIFICACIÓN AQUÍ para usar la URL como fondo 💡
-        const imageStyle = p.imagen 
+        // 💡 CÓDIGO CLAVE CORREGIDO 💡
+        // Construye el estilo para la imagen y determina si mostrar o no el emoji
+        const hasImage = p.imagen && p.imagen.trim() !== "";
+        const imageStyle = hasImage 
           ? `background-image: url('${p.imagen}');` 
           : '';
           
         card.innerHTML = `
           <div class="product-image" style="${imageStyle}">
-            ${p.imagen ? '' : '🛍'}
+            ${hasImage ? '' : '🛍'}
           </div>
           <div class="product-info">
             <div class="product-name">${p.nombre}</div>
@@ -999,7 +1003,7 @@
       const nombre = productName.value;
       const categoria = productCategory.value;
       const precio = parseFloat(productPrice.value);
-      const imagen = productImage.value;
+      const imagen = productImage.value.trim(); // <-- Importante: trim() para limpiar espacios
 
       if (!nombre || !categoria || !precio || isNaN(precio) || precio < 0) {
         alert("Por favor, completa todos los campos obligatorios con valores válidos.");
@@ -1015,7 +1019,7 @@
             nombre,
             categoria,
             precio: parseFloat(precio.toFixed(2)),
-            imagen // <-- Se guarda la URL del input de texto
+            imagen: imagen // <-- Se guarda la URL
           };
         }
       } else {
@@ -1026,7 +1030,7 @@
           nombre,
           categoria,
           precio: parseFloat(precio.toFixed(2)),
-          imagen // <-- Se guarda la URL del input de texto
+          imagen: imagen // <-- Se guarda la URL
         });
       }
 
