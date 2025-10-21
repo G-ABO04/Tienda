@@ -266,7 +266,33 @@
     .btn-delete { color: #ff6666; border-color: #ff6666; }
     .btn-delete:hover { background: #ff6666; color: white; }
 
-    /* ======= OVERLAY FORMULARIO ======= */
+    /* Estilos para el contador de cantidad */
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      margin-top: 5px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 90px;
+    }
+
+    .quantity-control button {
+      background: #eee;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 30px;
+    }
+
+    .quantity-control span {
+      padding: 0 5px;
+      text-align: center;
+      width: 30px;
+      font-size: 14px;
+    }
+
+    /* ======= OVERLAY FORMULARIO (ADMIN) ======= */
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -342,15 +368,23 @@
       color: #002147;
     }
 
-    .cart-item-price {
-      color: #0047ab;
-      font-weight: bold;
-    }
-
     .cart-item-actions {
       display: flex;
+      align-items: center;
       gap: 10px;
     }
+    .cart-item-actions .quantity-control {
+      width: 100px;
+      height: 30px;
+    }
+
+    .cart-item-subtotal {
+      width: 80px;
+      text-align: right;
+      font-weight: bold;
+      color: #0047ab;
+    }
+
 
     .cart-total {
       display: flex;
@@ -641,7 +675,6 @@
       <div class="form-actions">
         <button class="btn-primary" id="btnGuardar">Guardar</button>
         <button class="btn-cancel" id="btnCancelar">Cancelar</button>
-        
       </div>
     </div>
   </div>
@@ -729,7 +762,7 @@
   <script>
     // ========= DATOS SIMULADOS =========
     let usuario = null;
-    // 🌟 CAMBIO 2: Agregar la propiedad 'cantidad' (stock)
+    // Propiedad 'cantidad' (stock)
     let productos = [
       {id: 1, nombre: "Laptop HP", categoria: "Tecnología", precio: 18000, cantidad: 5, imagen: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"},
       {id: 2, nombre: "Audífonos JBL", categoria: "Audio", precio: 1200, cantidad: 12, imagen: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"},
@@ -737,17 +770,18 @@
       {id: 4, nombre: "Camisa Polo", categoria: "Ropa", precio: 350, cantidad: 20, imagen: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"}
     ];
     
-    // 💡 BASE DE DATOS DE USUARIOS SIMULADA 💡
+    // BASE DE DATOS DE USUARIOS SIMULADA
     let usuariosDB = [
       { nombre: "admin", email: "admin@tecmilenio.mx", password: "123", esAdmin: true },
       { nombre: "usuario", email: "user@mail.com", password: "123", esAdmin: false }
     ];
 
-    let carrito = [];
+    // Ahora el carrito guarda { idProducto, nombre, precio, cantidadComprada }
+    let carrito = []; 
     let historial = [];
     let editandoProducto = false;
 
-    // ========= ELEMENTOS =========
+    // ========= ELEMENTOS DOM (sin cambios) =========
     const loginScreen = document.getElementById("loginScreen");
     const mainApp = document.getElementById("mainApp");
     const loginForm = document.getElementById("loginForm");
@@ -766,7 +800,6 @@
     const productName = document.getElementById("productName");
     const productCategory = document.getElementById("productCategory");
     const productPrice = document.getElementById("productPrice");
-    // 🌟 CAMBIO 3: Nueva referencia para el campo de stock
     const productStock = document.getElementById("productStock"); 
     const productImage = document.getElementById("productImage");
     const btnGuardar = document.getElementById("btnGuardar");
@@ -781,8 +814,8 @@
     const paymentTotal = document.getElementById("paymentTotal");
     const logoutBtn = document.getElementById("logoutBtn");
 
+    // ========= AUTENTICACIÓN Y ROLES (sin cambios) =========
 
-    // ========= AUTENTICACIÓN Y ROLES =========
     loginTab.addEventListener('click', () => {
       loginTab.classList.add('active');
       registerTab.classList.remove('active');
@@ -797,12 +830,10 @@
       registerForm.style.display = 'block';
     });
 
-    // Manejador de Inicio de Sesión
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
-      
       if (email && password) {
         iniciarSesion(email, password);
       } else {
@@ -810,19 +841,16 @@
       }
     });
 
-    // Manejador de Registro
     registerForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = document.getElementById('regName').value;
       const email = document.getElementById('regEmail').value;
       const password = document.getElementById('regPassword').value;
       const confirmPassword = document.getElementById('regConfirmPassword').value;
-      
       if (password !== confirmPassword) {
         alert('Las contraseñas no coinciden');
         return;
       }
-      
       if (name && email && password) {
         registrarUsuario(name, email, password);
       } else {
@@ -830,12 +858,10 @@
       }
     });
 
-    // Lógica de Inicio de Sesión
     function iniciarSesion(email, password) {
       const userFound = usuariosDB.find(u => u.email === email);
-      
       if (userFound) {
-        if (userFound.password === password) { // Validación de contraseña simulada
+        if (userFound.password === password) { 
           usuario = userFound;
           actualizarInterfazUsuario();
           loginScreen.style.display = 'none';
@@ -848,49 +874,37 @@
       }
     }
 
-    // Lógica de Registro
     function registrarUsuario(nombre, email, password) {
       const userExists = usuariosDB.find(u => u.email === email);
       if (userExists) {
           alert('Este correo electrónico ya está registrado. Por favor, inicia sesión.');
           return;
       }
-      
-      // Asignar rol de Administrador si el correo es de Tecmilenio
       const esAdmin = email.endsWith('@tecmilenio.mx');
-      
       const nuevoUsuario = {
           nombre: nombre,
           email: email,
           password: password, 
           esAdmin: esAdmin
       };
-      
       usuariosDB.push(nuevoUsuario);
       usuario = nuevoUsuario;
-      
       alert(`Registro exitoso. Bienvenido, ${nombre}. Tienes rol de ${esAdmin ? "Administrador" : "Usuario"}.`);
-      
       actualizarInterfazUsuario();
       loginScreen.style.display = 'none';
       mainApp.style.display = 'block';
     }
 
-
-    // Lógica para cerrar sesión
     logoutBtn.addEventListener('click', () => {
         usuario = null;
         carrito = [];
         actualizarContadorCarrito();
         loginScreen.style.display = 'flex';
         mainApp.style.display = 'none';
-        // Limpiar el formulario de login y registro
         loginForm.reset();
         registerForm.reset();
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
-        
-        // Volver a la pestaña de Iniciar Sesión por defecto
         loginTab.click();
     });
 
@@ -913,7 +927,6 @@
 
     // ========= FUNCIONES DE PRODUCTOS =========
     function mostrarProductos() {
-      // Limpiar contenido antes de mostrar productos
       contentArea.innerHTML = '';
       
       const grid = document.createElement("div");
@@ -923,15 +936,8 @@
         const card = document.createElement("div");
         card.className = "product-card";
         
-        // Determinar qué mostrar en la imagen
-        let imagenHTML = '';
-        if (p.imagen) {
-          imagenHTML = `<img src="${p.imagen}" alt="${p.nombre}" onerror="this.onerror=null; this.parentElement.innerHTML='🛍';">`;
-        } else {
-          imagenHTML = '🛍';
-        }
+        let imagenHTML = p.imagen ? `<img src="${p.imagen}" alt="${p.nombre}" onerror="this.onerror=null; this.parentElement.innerHTML='🛍';">` : '🛍';
 
-        // Estilo para el stock: si es bajo (< 5) poner en rojo
         const stockColor = p.cantidad < 5 && p.cantidad > 0 ? '#ffb366' : (p.cantidad === 0 ? '#ff6666' : '#28a745');
         const stockText = p.cantidad > 0 ? `Stock: <strong>${p.cantidad}</strong>` : `<strong style="color: #ff6666;">AGOTADO</strong>`;
 
@@ -941,14 +947,14 @@
             <div class="product-name">${p.nombre}</div>
             <div class="product-category">${p.categoria}</div>
             <div class="product-price">$${p.precio.toFixed(2)}</div>
-                        <div style="font-size: 14px; margin-top: 5px; color: ${stockColor};">
+            <div style="font-size: 14px; margin-top: 5px; color: ${stockColor};">
               ${stockText}
             </div>
             <div>
               ${usuario.esAdmin
                 ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
                    <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
-                : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})" ${p.cantidad === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>${p.cantidad === 0 ? 'Agotado' : 'Agregar al carrito'}</button>`
+                : `<button class="btn-cart" onclick="agregarAlCarritoPrompt(${p.id})" ${p.cantidad === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>${p.cantidad === 0 ? 'Agotado' : 'Agregar al carrito'}</button>`
               }
             </div>
           </div>
@@ -959,7 +965,6 @@
       contentArea.appendChild(grid); 
       pageTitle.textContent = "Catálogo de Productos";
       
-      // Mostrar/Ocultar acciones de admin en el catálogo
       if (usuario && usuario.esAdmin) {
           adminActions.style.display = "block";
       } else {
@@ -967,13 +972,58 @@
       }
     }
 
-    function agregarAlCarrito(id) {
-      const p = productos.find(x => x.id === id);
-      // Se podría añadir lógica para revisar si hay stock antes de agregar.
-      carrito.push({...p}); 
+    // **Función modificada para pedir la cantidad al usuario**
+    function agregarAlCarritoPrompt(id) {
+      const productoCatalogo = productos.find(x => x.id === id);
+
+      if (!productoCatalogo || productoCatalogo.cantidad <= 0) {
+        alert('Producto agotado.');
+        return;
+      }
+
+      // Pedir al usuario la cantidad
+      const cantidadStr = prompt(`¿Cuántas unidades de "${productoCatalogo.nombre}" deseas agregar? (Máx: ${productoCatalogo.cantidad})`, 1);
+      
+      if (cantidadStr === null) return; // Si el usuario cancela
+
+      let cantidad = parseInt(cantidadStr);
+
+      if (isNaN(cantidad) || cantidad <= 0) {
+        alert('Por favor, ingresa una cantidad válida.');
+        return;
+      }
+
+      if (cantidad > productoCatalogo.cantidad) {
+        alert(`Solo hay ${productoCatalogo.cantidad} unidades en stock.`);
+        return;
+      }
+
+      // Buscar si el producto ya está en el carrito
+      const itemCarrito = carrito.find(item => item.idProducto === id);
+
+      if (itemCarrito) {
+        // Si ya está, actualizar la cantidad
+        const nuevaCantidad = itemCarrito.cantidadComprada + cantidad;
+        // Verificar si la nueva cantidad excede el stock total
+        if (nuevaCantidad > productoCatalogo.cantidad) {
+          alert(`No puedes agregar esa cantidad. El stock total es de ${productoCatalogo.cantidad} y ya tienes ${itemCarrito.cantidadComprada} en el carrito.`);
+          return;
+        }
+        itemCarrito.cantidadComprada = nuevaCantidad;
+      } else {
+        // Si no está, agregarlo
+        carrito.push({
+          idProducto: id,
+          nombre: productoCatalogo.nombre,
+          precio: productoCatalogo.precio,
+          cantidadComprada: cantidad
+        });
+      }
+
       actualizarContadorCarrito();
-      alert(`${p.nombre} agregado al carrito`);
+      alert(`${cantidad} unidad(es) de ${productoCatalogo.nombre} agregada(s) al carrito.`);
     }
+
 
     function editar(id) {
       const p = productos.find(x => x.id === id);
@@ -983,7 +1033,6 @@
       productName.value = p.nombre;
       productCategory.value = p.categoria;
       productPrice.value = p.precio;
-      // 🌟 CAMBIO 5: Cargar el stock del producto al editar
       productStock.value = p.cantidad;
       productImage.value = p.imagen || "";
       overlay.style.display = "flex";
@@ -997,10 +1046,12 @@
     }
 
     function actualizarContadorCarrito() {
-      cartCount.textContent = carrito.length;
+      // El contador ahora es la suma de las cantidades compradas en el carrito
+      const totalItems = carrito.reduce((acc, item) => acc + item.cantidadComprada, 0);
+      cartCount.textContent = totalItems;
     }
 
-    // ========= GESTIÓN DE PRODUCTOS =========
+    // ========= GESTIÓN DE PRODUCTOS (ADMIN) (sin cambios) =========
     btnAgregar.addEventListener('click', () => {
       editandoProducto = false;
       formTitle.textContent = "Agregar Producto";
@@ -1008,7 +1059,6 @@
       productName.value = "";
       productCategory.value = "";
       productPrice.value = "";
-      // 🌟 CAMBIO 6: Limpiar el stock al agregar (poner por defecto 0) 🌟
       productStock.value = "0"; 
       productImage.value = "";
       overlay.style.display = "flex";
@@ -1019,7 +1069,6 @@
       const nombre = productName.value;
       const categoria = productCategory.value;
       const precio = parseFloat(productPrice.value);
-      // 🌟 CAMBIO 7: Obtener y guardar el stock 🌟
       const cantidad = parseInt(productStock.value); 
       const imagen = productImage.value;
 
@@ -1029,7 +1078,6 @@
       }
       
       if (editandoProducto) {
-        // Editar producto existente
         const index = productos.findIndex(p => p.id == id);
         if (index !== -1) {
           productos[index] = {
@@ -1037,19 +1085,18 @@
             nombre,
             categoria,
             precio: parseFloat(precio.toFixed(2)),
-            cantidad: cantidad, // Guardar la cantidad editada
+            cantidad: cantidad, 
             imagen
           };
         }
       } else {
-        // Agregar nuevo producto
         const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
         productos.push({
           id: nuevoId,
           nombre,
           categoria,
           precio: parseFloat(precio.toFixed(2)),
-          cantidad: cantidad, // Guardar la cantidad del nuevo producto
+          cantidad: cantidad, 
           imagen
         });
       }
@@ -1062,7 +1109,29 @@
       overlay.style.display = "none";
     });
 
-    // ========= CARRITO =========
+    // ========= CARRITO (Lógica para + y - cantidad) =========
+    function cambiarCantidadCarrito(index, delta) {
+      const item = carrito[index];
+      const productoCatalogo = productos.find(p => p.id === item.idProducto);
+      
+      const nuevaCantidad = item.cantidadComprada + delta;
+
+      if (nuevaCantidad < 1) {
+        // Si la cantidad es 0, eliminar el producto
+        eliminarDelCarrito(index);
+        return;
+      }
+
+      if (nuevaCantidad > productoCatalogo.cantidad) {
+        alert(`No hay suficiente stock. Solo quedan ${productoCatalogo.cantidad} unidades disponibles.`);
+        return;
+      }
+
+      item.cantidadComprada = nuevaCantidad;
+      mostrarCarrito();
+      actualizarContadorCarrito();
+    }
+
     function mostrarCarrito() {
       pageTitle.textContent = "Carrito de Compras";
       adminActions.style.display = "none"; 
@@ -1085,18 +1154,24 @@
       
       let total = 0;
       carrito.forEach((item, index) => {
+        const subtotal = item.precio * item.cantidadComprada;
+        total += subtotal;
         html += `
           <div class="cart-item">
             <div class="cart-item-info">
-              <div class="cart-item-name">${item.nombre}</div>
-              <div class="cart-item-price">$${item.precio.toFixed(2)}</div>
+              <div class="cart-item-name">${item.nombre} ($${item.precio.toFixed(2)} c/u)</div>
             </div>
             <div class="cart-item-actions">
-              <button class="btn-remove" onclick="eliminarDelCarrito(${index})">Eliminar</button>
+                            <div class="quantity-control">
+                <button onclick="cambiarCantidadCarrito(${index}, -1)">-</button>
+                <span>${item.cantidadComprada}</span>
+                <button onclick="cambiarCantidadCarrito(${index}, 1)">+</button>
+              </div>
+              <div class="cart-item-subtotal">$${subtotal.toFixed(2)}</div>
+              <button class="btn-remove" onclick="eliminarDelCarrito(${index})">X</button>
             </div>
           </div>
         `;
-        total += item.precio;
       });
       
       html += `
@@ -1119,13 +1194,11 @@
 
     // ========= FORMULARIO DE PAGO =========
     function mostrarFormularioPago() {
-      // Configurar y manejar la selección de métodos de pago
       document.querySelectorAll('.payment-method').forEach(method => {
         method.onclick = function() { 
           document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
           this.classList.add('selected');
           
-          // Lógica para mostrar/ocultar el formulario de tarjeta si es necesario
           const cardForm = document.getElementById('creditCardForm');
           if (this.dataset.method === 'credit' || this.dataset.method === 'debit') {
             cardForm.style.display = 'grid';
@@ -1139,12 +1212,13 @@
       let total = 0;
       paymentSummaryItems.innerHTML = '';
       carrito.forEach(item => {
-        total += item.precio;
+        const subtotal = item.precio * item.cantidadComprada;
+        total += subtotal;
         const itemDiv = document.createElement('div');
         itemDiv.className = 'payment-summary-item';
         itemDiv.innerHTML = `
-          <span>${item.nombre}</span>
-          <span>$${item.precio.toFixed(2)}</span>
+          <span>${item.nombre} (${item.cantidadComprada}x)</span>
+          <span>$${subtotal.toFixed(2)}</span>
         `;
         paymentSummaryItems.appendChild(itemDiv);
       });
@@ -1158,7 +1232,6 @@
     });
 
     btnConfirmPayment.addEventListener('click', () => {
-      // 1. Simular validación de formulario (muy básica)
       const shippingName = document.getElementById('shippingName').value;
       if (!shippingName) {
         alert("Por favor, completa la información de envío.");
@@ -1171,7 +1244,20 @@
         return;
       }
       
-      // 2. Procesar la compra
+      // 1. Descontar el stock de los productos vendidos
+      for (const item of carrito) {
+        const productoCatalogo = productos.find(p => p.id === item.idProducto);
+        if (productoCatalogo) {
+          // Descontar la cantidad comprada del stock
+          productoCatalogo.cantidad -= item.cantidadComprada; 
+          // Asegurarse que no sea negativo (aunque la validación previa lo impide)
+          if (productoCatalogo.cantidad < 0) {
+            productoCatalogo.cantidad = 0;
+          }
+        }
+      }
+      
+      // 2. Guardar la compra en el historial
       const fecha = new Date().toLocaleDateString();
       const hora = new Date().toLocaleTimeString();
       const total = parseFloat(paymentTotal.textContent.replace('$', ''));
@@ -1181,21 +1267,26 @@
         fecha: fecha + ' ' + hora,
         total: total,
         metodo: selectedMethod.textContent.trim(),
-        productos: carrito.map(p => ({ nombre: p.nombre, precio: p.precio })) // Guardamos una copia simple
+        // Guardar los productos con la cantidad comprada
+        productos: carrito.map(p => ({ 
+          nombre: p.nombre, 
+          precio: p.precio, 
+          cantidad: p.cantidadComprada 
+        })) 
       };
       
       historial.push(nuevaCompra);
       carrito = []; // Vaciar carrito
       actualizarContadorCarrito();
       
-      alert('¡Pago confirmado! Tu pedido ha sido procesado.');
+      alert('¡Pago confirmado! Tu pedido ha sido procesado y el stock actualizado.');
       
       paymentOverlay.style.display = 'none';
-      mostrarProductos(); // Volver al catálogo después de comprar
+      mostrarProductos(); // Volver al catálogo
     });
 
 
-    // ========= HISTORIAL =========
+    // ========= HISTORIAL (sin cambios grandes, sólo muestra la cantidad) =========
     function mostrarHistorial() {
       pageTitle.textContent = "Historial de Compras";
       adminActions.style.display = "none";
@@ -1207,9 +1298,9 @@
       if (historial.length === 0) {
         container.innerHTML = '<p class="empty-cart">No tienes compras registradas.</p>';
       } else {
-        // Mostrar el historial más reciente primero
         historial.slice().reverse().forEach(item => {
-          const productListHtml = item.productos.map(p => `<li>${p.nombre} ($${p.precio.toFixed(2)})</li>`).join('');
+          // Modificado para incluir la cantidad
+          const productListHtml = item.productos.map(p => `<li>${p.nombre} (${p.cantidad}x) - $${(p.precio * p.cantidad).toFixed(2)}</li>`).join('');
           
           container.innerHTML += `
             <div class="history-item">
@@ -1233,7 +1324,7 @@
       contentArea.appendChild(container);
     }
     
-    // ========= NAVEGACIÓN DE MENÚ (Sidebar) =========
+    // ========= NAVEGACIÓN DE MENÚ (Sidebar) (sin cambios) =========
     document.getElementById('menuCatalogo').addEventListener('click', (e) => {
       e.preventDefault();
       document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
@@ -1255,7 +1346,6 @@
       mostrarHistorial();
     });
 
-    // Iniciar con el catálogo si ya hay una sesión activa (por si se recarga la página)
     if (usuario) {
       mostrarProductos();
       actualizarContadorCarrito();
