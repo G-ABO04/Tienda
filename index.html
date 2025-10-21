@@ -785,8 +785,8 @@
     registerTab.addEventListener('click', () => {
       registerTab.classList.add('active');
       loginTab.classList.remove('active');
-      registerForm.style.display = 'block';
       loginForm.style.display = 'none';
+      registerForm.style.display = 'block';
     });
 
     // Manejador de Inicio de Sesión
@@ -861,7 +861,7 @@
       usuariosDB.push(nuevoUsuario);
       usuario = nuevoUsuario;
       
-      alert(Registro exitoso. Bienvenido, ${nombre}. Tienes rol de ${esAdmin ? "Administrador" : "Usuario"}.);
+      alert(`Registro exitoso. Bienvenido, ${nombre}. Tienes rol de ${esAdmin ? "Administrador" : "Usuario"}.`);
       
       actualizarInterfazUsuario();
       loginScreen.style.display = 'none';
@@ -933,7 +933,7 @@
               ${usuario.esAdmin
                 ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
                    <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
-                : <button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>
+                : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`
               }
             </div>
           </div>
@@ -956,7 +956,7 @@
       const p = productos.find(x => x.id === id);
       carrito.push({...p}); 
       actualizarContadorCarrito();
-      alert(${p.nombre} agregado al carrito);
+      alert(`${p.nombre} agregado al carrito`);
     }
 
     function editar(id) {
@@ -1020,4 +1020,18 @@
         }
       } else {
         // Agregar nuevo producto
-        const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1
+        const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+        productos.push({
+          id: nuevoId,
+          nombre,
+          categoria,
+          precio: parseFloat(precio.toFixed(2)),
+          imagen
+        });
+      }
+
+      mostrarProductos();
+      overlay.style.display = "none";
+    });
+
+    btnCancelar.addEventListener('click
