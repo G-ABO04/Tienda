@@ -555,9 +555,9 @@
       <div class="role-info">
         <strong>Credenciales de Prueba:</strong>
         <ul>
-          <li>*Administrador:* admin@tecmilenio.mx / 123</li>
-          <li>*Usuario Normal:* user@mail.com / 123</li>
-          <li>Cualquier registro con correo @tecmilenio.mx obtiene rol de *Administrador*.</li>
+          <li>**Administrador:** admin@tecmilenio.mx / 123</li>
+          <li>**Usuario Normal:** user@mail.com / 123</li>
+          <li>Cualquier registro con correo `@tecmilenio.mx` obtiene rol de **Administrador**.</li>
         </ul>
       </div>
     </div>
@@ -669,7 +669,7 @@
             💳 Tarjeta de Débito
           </div>
           <div class="payment-method" data-method="paypal">
-            🅿 PayPal
+            🅿️ PayPal
           </div>
         </div>
         
@@ -849,7 +849,7 @@
       usuariosDB.push(nuevoUsuario);
       usuario = nuevoUsuario;
       
-      alert(Registro exitoso. Bienvenido, ${nombre}. Tienes rol de ${esAdmin ? "Administrador" : "Usuario"}.);
+      alert(`Registro exitoso. Bienvenido, ${nombre}. Tienes rol de ${esAdmin ? "Administrador" : "Usuario"}.`);
       
       actualizarInterfazUsuario();
       loginScreen.style.display = 'none';
@@ -912,7 +912,7 @@
               ${usuario.esAdmin
                 ? `<button class="btn-edit" onclick="editar(${p.id})">Editar</button>
                    <button class="btn-delete" onclick="borrar(${p.id})">Borrar</button>`
-                : <button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>
+                : `<button class="btn-cart" onclick="agregarAlCarrito(${p.id})">Agregar al carrito</button>`
               }
             </div>
           </div>
@@ -935,7 +935,7 @@
       const p = productos.find(x => x.id === id);
       carrito.push({...p}); 
       actualizarContadorCarrito();
-      alert(${p.nombre} agregado al carrito);
+      alert(`${p.nombre} agregado al carrito`);
     }
 
     function editar(id) {
@@ -1113,7 +1113,7 @@
       });
       
       paymentSummaryItems.innerHTML = summaryHtml;
-      paymentTotal.textContent = $${total.toFixed(2)};
+      paymentTotal.textContent = `$${total.toFixed(2)}`;
       
       // Mostrar overlay de pago
       paymentOverlay.style.display = "flex";
@@ -1184,13 +1184,13 @@
       contentArea.innerHTML = '';
 
       if (historial.length === 0) {
-        contentArea.innerHTML = <div class="history-container"><div class="empty-cart"><h3>No tienes compras en tu historial</h3></div></div>;
+        contentArea.innerHTML = `<div class="history-container"><div class="empty-cart"><h3>No tienes compras en tu historial</h3></div></div>`;
         return;
       }
 
-      let html = <div class="history-container">;
+      let html = `<div class="history-container">`;
       historial.slice().reverse().forEach(compra => { 
-        let productList = compra.productos.map(p => <li>${p.nombre} ($${p.precio.toFixed(2)})</li>).join('');
+        let productList = compra.productos.map(p => `<li>${p.nombre} ($${p.precio.toFixed(2)})</li>`).join('');
         
         html += `
           <div class="history-item">
@@ -1209,7 +1209,7 @@
         `;
       });
 
-      html += </div>;
+      html += `</div>`;
       contentArea.innerHTML = html;
     }
 
